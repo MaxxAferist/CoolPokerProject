@@ -18,12 +18,21 @@ def termit():
     sys.exit()
 
 
+def transform_image(image):
+    rect = image.get_rect()
+    w = rect.w
+    h = rect.h
+    koef = width / 1920
+    image = pygame.transform.scale(image, (w * koef, h * koef))
+    return image
+
+
 class Card(pygame.sprite.Sprite):
     def __init__(self, value, suit, pos):
         super().__init__(all_sprites, card_sprites)
         self.value = value
         self.suit = suit
-        self.image = load_image(f'cards//{self.value}_{self.suit}.png')
+        self.image = transform_image(load_image(f'cards//{self.value}_{self.suit}.png'))
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
@@ -37,8 +46,7 @@ class Card(pygame.sprite.Sprite):
                 self.motion_go = True
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 self.motion_go = False
-            if event.type == pygame.MOUSEMOTION and self.motion_go and \
-                    self.rect.collidepoint(event.pos):
+            if event.type == pygame.MOUSEMOTION and self.motion_go:
                 self.rect.x += event.rel[0]
                 self.rect.y += event.rel[1]
 
@@ -54,6 +62,10 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
     card_sprites = pygame.sprite.Group()
+    fon = pygame.sprite.Sprite(all_sprites)
+    fon_image = pygame.transform.scale(load_image('Poker_table.jpg'), (width, height))
+    fon.image = fon_image
+    fon.rect = fon_image.get_rect()
 
     while running:
         event = None
@@ -61,7 +73,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 termit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                Card('2', 'cherv', event.pos)
+                Card('K', 'cherv', event.pos)
             all_sprites.update(event)
         screen.fill(pygame.Color('darkslategray'))
         all_sprites.draw(screen)
