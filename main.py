@@ -2,6 +2,12 @@ import pygame
 import sys
 import os
 from ctypes import *
+from menu import *
+
+
+WIDTH = windll.user32.GetSystemMetrics(0)
+HEIGHT = windll.user32.GetSystemMetrics(1)
+FPS = 60
 
 
 def load_image(name):
@@ -22,28 +28,32 @@ def transform_image(image):
     rect = image.get_rect()
     w = rect.w
     h = rect.h
-    koef = width / 1920
+    koef = WIDTH / 1920
     image = pygame.transform.scale(image, (int(w * koef), (h * koef)))
     return image
 
 
-class Button():
-    def __init__(self, x, y, image, scale, func):
-        w, h = image.get_width(), image.get_height()
-        self.image = pygame.transform.scale(image, (w * scale, h * scale))
+class Button(pygame.sprite.Sprite):
+    def __init__(self, name, pos):
+        super(Button, self).__init__()
+        self.name = name
+        f = pygame.font.Font(None, 36)
+        self.text = f.render(self.name, True,
+                             (0, 0, 0))
+        self.image = pygame.Surface((300, 50))
+        self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.click_flag = False
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.image.blit(self.text, (150 - self.text.get_rect()[2] / 2, 15))
 
-    def draw(self):
-        mouse_pos = pygame.mouse.get_pos()
-        pressed = pygame.mouse.get_pressed()[0]
-        if self.rect.collidepoint(mouse_pos) and pressed and not self.click_flag:
-            print('click')
-            self.click_flag = True
-        if not pressed and self.click_flag:
-            self.click_flag = False
-        screen.blit(self.image, (self.rect.x, self.rect.y))
+    def aimed(self, flag):
+        if flag:
+            self.image.fill((200, 200, 200))
+            self.image.blit(self.text, (150 - self.text.get_rect()[2] / 2, 15))
+        else:
+            self.image.fill((255, 255, 255))
+            self.image.blit(self.text, (150 - self.text.get_rect()[2] / 2, 15))
 
 
 class Card(pygame.sprite.Sprite):
@@ -74,7 +84,6 @@ if __name__ == '__main__':
     pygame.init()
     pygame.display.set_caption('Poker')
     size = 0, 0
-    width, height = windll.user32.GetSystemMetrics(0), windll.user32.GetSystemMetrics(1)
     screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
     running = True
     FPS = 60
@@ -82,11 +91,11 @@ if __name__ == '__main__':
     all_sprites = pygame.sprite.Group()
     card_sprites = pygame.sprite.Group()
     fon = pygame.sprite.Sprite(all_sprites)
-    fon_image = pygame.transform.scale(load_image('Poker_table.jpg'), (width, height))
+    fon_image = pygame.transform.scale(load_image('Poker_table.jpg'), (WIDTH, HEIGHT))
     fon.image = fon_image
     fon.rect = fon_image.get_rect()
-    btn_img = load_image('cards//2_pik.png')
-    button = Button(100, 200, btn_img, 1, termit)
+    menu = Menu()
+    menu.run()
 
     while running:
         event = None
@@ -98,6 +107,5 @@ if __name__ == '__main__':
             all_sprites.update(event)
         screen.fill(pygame.Color('darkslategray'))
         all_sprites.draw(screen)
-        button.draw()
         pygame.display.flip()
         clock.tick(FPS)
