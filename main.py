@@ -9,7 +9,7 @@ def load_image(name):
     if not os.path.isfile(filename):
         print(f'Image is not found: {filename}')
         sys.exit()
-    image = pygame.image.load(filename)
+    image = transform_image(pygame.image.load(filename))
     return image
 
 
@@ -23,8 +23,27 @@ def transform_image(image):
     w = rect.w
     h = rect.h
     koef = width / 1920
-    image = pygame.transform.scale(image, (w * koef, h * koef))
+    image = pygame.transform.scale(image, (int(w * koef), (h * koef)))
     return image
+
+
+class Button():
+    def __init__(self, x, y, image, scale, func):
+        w, h = image.get_width(), image.get_height()
+        self.image = pygame.transform.scale(image, (w * scale, h * scale))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.click_flag = False
+
+    def draw(self):
+        mouse_pos = pygame.mouse.get_pos()
+        pressed = pygame.mouse.get_pressed()[0]
+        if self.rect.collidepoint(mouse_pos) and pressed and not self.click_flag:
+            print('click')
+            self.click_flag = True
+        if not pressed and self.click_flag:
+            self.click_flag = False
+        screen.blit(self.image, (self.rect.x, self.rect.y))
 
 
 class Card(pygame.sprite.Sprite):
@@ -32,7 +51,7 @@ class Card(pygame.sprite.Sprite):
         super().__init__(all_sprites, card_sprites)
         self.value = value
         self.suit = suit
-        self.image = transform_image(load_image(f'cards//{self.value}_{self.suit}.png'))
+        self.image = load_image(f'cards//{self.value}_{self.suit}.png')
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
@@ -66,6 +85,8 @@ if __name__ == '__main__':
     fon_image = pygame.transform.scale(load_image('Poker_table.jpg'), (width, height))
     fon.image = fon_image
     fon.rect = fon_image.get_rect()
+    btn_img = load_image('cards//2_pik.png')
+    button = Button(100, 200, btn_img, 1, termit)
 
     while running:
         event = None
@@ -77,5 +98,6 @@ if __name__ == '__main__':
             all_sprites.update(event)
         screen.fill(pygame.Color('darkslategray'))
         all_sprites.draw(screen)
+        button.draw()
         pygame.display.flip()
         clock.tick(FPS)
