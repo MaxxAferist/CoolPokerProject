@@ -10,6 +10,30 @@ def go_game():
     run_game.run()
 
 
+class Beautiful_fon(pygame.sprite.Sprite):
+    def __init__(self, image):
+        super().__init__()
+        self.image = pygame.transform.scale(image, (int(WIDTH * 1.3), int(HEIGHT * 1.3)))
+        self.rect = self.image.get_rect()
+        self.rect.x = (WIDTH - self.rect.w) // 2
+        self.rect.y = (HEIGHT - self.rect.h) // 2
+        self.v = 0
+        self.go = 1
+        self.dx = -1
+        self.dy = -1
+
+    def update(self, *args):
+        if self.v > self.go:
+            if self.rect.x + self.dx > 0 or self.rect.x + self.dx + self.rect.w < WIDTH:
+                self.dx = -self.dx
+            self.rect.x += self.dx
+            if self.rect.y + self.dy > 0 or self.rect.y + self.dy + self.rect.h < HEIGHT:
+                self.dy = -self.dy
+            self.rect.y += self.dy
+            self.v = 0
+        self.v += 1
+
+
 class Menu():
     def __init__(self):
         pygame.display.set_caption('Menu')
@@ -17,15 +41,12 @@ class Menu():
         self.clock = pygame.time.Clock()
         self.all_sprites = pygame.sprite.Group()
         self.button_sprites = pygame.sprite.Group()
-        self.fon = pygame.sprite.Sprite(self.all_sprites)
-        fon_image = pygame.transform.scale(load_image('Poker_menu.jpg'), (WIDTH, HEIGHT))
-        self.fon.image = fon_image
-        self.fon.rect = fon_image.get_rect()
-        self.buttons = [Button('Новая Игра', (105, 50), go_game),
-                    Button('DSD', (105, 120)),
-                    Button('Правила', (105, 190)),
-                    Button('Настройки', (105, 260)),
-                    Button('Выход', (105, 330), termit)]
+        fon_image = pygame.image.load('data//Poker_menu_2.png')
+        self.fon = Beautiful_fon(fon_image)
+        self.all_sprites.add(self.fon)
+        self.buttons = [Button('Новая Игра', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2), go_game),
+                    Button('Настройки', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2 + 70)),
+                    Button('Выход', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2 + 140), termit)]
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
 
@@ -36,8 +57,10 @@ class Menu():
                 for btn in self.buttons:
                     btn.draw()
             self.all_sprites.draw(self.screen)
+            self.all_sprites.update()
             pygame.display.flip()
             self.clock.tick(FPS)
+
 
 if __name__ == '__main__':
     menu = Menu()
