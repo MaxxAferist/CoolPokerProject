@@ -46,8 +46,9 @@ class Button(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
-        self.image.blit(self.text, (self.w // 2 - self.text.get_rect()[2] / 2, 15 * KOEF))
+        self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
         self.click_flag = False
+        self.pressed_flag = False
         self.action = action
 
     def draw(self):
@@ -56,13 +57,17 @@ class Button(pygame.sprite.Sprite):
         if self.rect.collidepoint(pos) and pressed:
             self.image.fill((100, 100, 100))
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
+            self.pressed_flag = True
+        elif self.rect.collidepoint(pos) and self.pressed_flag and not pressed:
             if self.click_flag and self.action:
+                self.pressed_flag = False
                 self.action()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
             self.image.fill((200, 200, 200))
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
         else:
+            self.pressed_flag = False
             self.image.fill((255, 255, 255))
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
 
@@ -88,24 +93,29 @@ class Cards_back(pygame.sprite.Sprite):
         super().__init__()
         self.image = Cards_back.image
         self.rect = self.image.get_rect()
+        self.x = 0
+        self.y = 0
         self.motion = False
         self.k = None
         self.b = None
-        self.v = 1
+        self.v = 10
         self.final_coords = None, None
 
     def update(self):
         if self.motion:
             self.rect.x += self.v
             self.rect.y = int(self.k * self.rect.x + self.b) # каждый кадр меняем х на 1, у соотвественно
-            if self.final_coords == (self.rect.x, self.rect.y):
+            if self.rect.x in range(self.final_coords[0] - self.v, self.final_coords[0] + self.v):
+                self.rect.x = self.final_coords[0]
+                self.rect.y = self.final_coords[1]
                 self.motion = False
-
 
     def get_trajectory(self, pos1, pos2): #Получаем k и b уравнения y=kx+b - траектория полета карт
         x1, y1 = pos1
         x2, y2 = pos2
-        self.k = (y2 - y2) / (x2 - x1)
+        self.rect.x = x1
+        self.rect.y = y1
+        self.k = (y2 - y1) / (x2 - x1)
         self.b = y1 - self.k * x1
         self.motion = True
         self.final_coords = pos2

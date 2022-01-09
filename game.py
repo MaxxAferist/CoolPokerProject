@@ -1,3 +1,5 @@
+import pygame.sprite
+
 from functions import *
 
 
@@ -97,10 +99,11 @@ class Game():
         self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * KOEF),
                                                                  int(koloda_image.get_height() * KOEF)))
 
-        self.buttons = [Button('Ва Банк', (WIDTH * 0.75, HEIGHT * 0.75 - 15 * KOEF), (400, 60), termit),
-                        Button('Колл', (WIDTH * 0.75, HEIGHT * 0.75 + 55 * KOEF), (400, 60), termit),
-                        Button('Пас', (WIDTH * 0.75, HEIGHT * 0.75 + 125 * KOEF), (400, 60), termit),
-                        Button('Чек', (WIDTH * 0.75, HEIGHT * 0.75 - 85 * KOEF), (400, 60), termit)]
+        self.buttons = [Button('Пас', (WIDTH * 0.75, HEIGHT * 0.75 - 15 * KOEF), (400, 60), termit),
+                        Button('Чек', (WIDTH * 0.75, HEIGHT * 0.75 + 55 * KOEF), (400, 60), termit),
+                        Button('Ва-Банк', (WIDTH * 0.75, HEIGHT * 0.75 + 125 * KOEF), (400, 60), termit),
+                        Button('Райс', (WIDTH * 0.75, HEIGHT * 0.75 - 85 * KOEF), (400, 60), termit),
+                        Button('Колл', (WIDTH * 0.75, HEIGHT * 0.75 - 155 * KOEF), (400, 60), termit)]
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
         self.add_sprites()
@@ -108,6 +111,11 @@ class Game():
 
     def run(self):
         self.running = True
+        self.graph = Poker_graphic()
+        self.graph.preflop(self)
+        self.graph.flop(self)
+        self.graph.tern(self)
+        self.graph.river(self)
         while self.running:
             for event in pygame.event.get():
                 for btn in self.buttons:
@@ -116,65 +124,150 @@ class Game():
                     self.running = False
             self.all_sprites.draw(self.screen)
             pygame.display.flip()
+            self.screen.fill(pygame.Color(0, 0, 0))
             self.clock.tick(FPS)
 
     def add_sprites(self):
-        koef = WIDTH / 1920
         w_card = Place_from_card.image.get_width()
         h_card = Place_from_card.image.get_height()
-        left_top = (1920 * koef - (w_card * 5 + 40 * koef * 4)) // 2
-        up_top = (1080 * koef - h_card) // 4
+        left_top = (WIDTH - (w_card * 5 + 40 * KOEF * 4)) // 2
+        up_top = (HEIGHT - h_card) * 0.4
         for i in range(5):
-            pos = left_top + i * w_card + i * 40 * koef, up_top + 175
+            pos = left_top + i * w_card + i * 40 * KOEF, up_top
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.table_place_sprites.add(place)
 
-        left_top = (1920 * koef - (w_card * 2 + 40 * koef)) // 2
-        up_top = 1080 * koef - (1080 * koef - h_card) // 4 - h_card
+        left_top = (WIDTH - (w_card * 2 + 40 * KOEF)) // 2
+        up_top = (HEIGHT - h_card) * 0.85
         for i in range(2):
-            pos = left_top + i * w_card + i * 40 * koef, up_top + 75
+            pos = left_top + i * w_card + i * 40 * KOEF, up_top
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.player_place_sprites.add(place)
 
-        w_card_k = int(Place_from_card.image.get_width())
-        h_card_k = int(Place_from_card.image.get_height())
-        left_top = (1920 * koef - (w_card_k * 2 + 40 * koef)) // 2
-        up_top = ((1080 * koef - h_card) // 4 - h_card_k) // 2
+        w_card_k = Place_from_card.image.get_width()
+        h_card_k = Place_from_card.image.get_height()
+        left_top = (WIDTH - (w_card_k * 2 + 40 * KOEF)) // 2
+        up_top = int((HEIGHT - h_card) * 0.07)
         for i in range(2):
-            pos = left_top + i * w_card_k + i * 40 * koef, up_top + 75
+            pos = left_top + i * w_card_k + i * 40 * KOEF, up_top
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.bot_place_sprites.add(place)
 
         robot = pygame.sprite.Sprite(self.all_sprites)
-        robot.image = pygame.transform.scale(self.robot_image, (w_card_k, h_card_k))
+        robot.image = pygame.transform.scale(self.robot_image, (int(w_card_k * 0.75), (h_card_k * 0.75)))
         robot.rect = self.robot_image.get_rect()
 
-        up_top = ((1080 * koef - h_card) // 4 - h_card_k) // 2 + 75
-        left_top = (1920 * koef - (w_card_k * 2 + 40 * koef)) // 2 - w_card_k * 1.25
+        up_top = int((HEIGHT - h_card) * 0.07)
+        left_top = (WIDTH - (w_card_k * 2 + 40 * KOEF)) // 2 - w_card_k
         robot.rect.x = left_top
         robot.rect.y = up_top
 
-        koloda = pygame.sprite.Sprite(self.all_sprites)
-        koloda.image = pygame.transform.scale(self.koloda_image, (w_card_k, h_card_k))
-        koloda.rect = self.koloda_image.get_rect()
+        self.koloda = pygame.sprite.Sprite(self.all_sprites)
+        self.koloda.image = pygame.transform.scale(self.koloda_image, (w_card_k, h_card_k))
+        self.koloda.rect = self.koloda_image.get_rect()
 
-        up_top = 390
-        left_top = 150
-        koloda.rect.x = left_top
-        koloda.rect.y = up_top
+        up_top = (HEIGHT - h_card) * 0.4
+        left_top = (WIDTH - self.koloda.rect.w) * 0.05
+        self.koloda.rect.x = left_top
+        self.koloda.rect.y = up_top
 
 
-class Game_graphic():
+class Poker_graphic():
     def __init__(self):
-        pass
+        self.bank = 0
+        self.table_cards = pygame.sprite.Group()
+        self.players_cards = pygame.sprite.Group()
 
-    def update(self):
-        pass
+    def preflop(self, table):
+        cards = pygame.sprite.Group()
+        for i in range(2):
+            card = Cards_back()
+            x2 = table.player_place_sprites.sprites()[i].rect.x
+            y2 = table.player_place_sprites.sprites()[i].rect.y
+            x1 = table.koloda.rect.x
+            y1 = table.koloda.rect.y
+            card.get_trajectory((x1, y1), (x2, y2))
+            cards.add(card)
+        for i in range(2):
+            card = Cards_back()
+            x2 = table.bot_place_sprites.sprites()[i].rect.x
+            y2 = table.bot_place_sprites.sprites()[i].rect.y
+            x1 = table.koloda.rect.x
+            y1 = table.koloda.rect.y
+            card.get_trajectory((x1, y1), (x2, y2))
+            cards.add(card)
+        table.all_sprites.add(cards)
+        while True:
+            table.screen.fill(pygame.Color(0, 0, 0))
+            table.all_sprites.draw(table.screen)
+            cards.draw(table.screen)
+            cards.update()
+            pygame.display.flip()
+            if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                break
 
+    def flop(self, table):
+        cards = pygame.sprite.Group()
+        for i in range(3):
+            card = Cards_back()
+            x2 = table.table_place_sprites.sprites()[i].rect.x
+            y2 = table.table_place_sprites.sprites()[i].rect.y
+            x1 = table.koloda.rect.x
+            y1 = table.koloda.rect.y
+            card.get_trajectory((x1, y1), (x2, y2))
+            cards.add(card)
+        table.all_sprites.add(cards)
+        while True:
+            table.screen.fill(pygame.Color(0, 0, 0))
+            table.all_sprites.draw(table.screen)
+            cards.draw(table.screen)
+            cards.update()
+            pygame.display.flip()
+            if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                break
+
+    def tern(self, table):
+        cards = pygame.sprite.Group()
+        card = Cards_back()
+        x2 = table.table_place_sprites.sprites()[-2].rect.x
+        y2 = table.table_place_sprites.sprites()[-2].rect.y
+        x1 = table.koloda.rect.x
+        y1 = table.koloda.rect.y
+        card.get_trajectory((x1, y1), (x2, y2))
+        cards.add(card)
+        table.all_sprites.add(cards)
+        while True:
+            table.screen.fill(pygame.Color(0, 0, 0))
+            table.all_sprites.draw(table.screen)
+            cards.draw(table.screen)
+            cards.update()
+            pygame.display.flip()
+            if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                break
+
+    def river(self, table):
+        cards = pygame.sprite.Group()
+        card = Cards_back()
+        x2 = table.table_place_sprites.sprites()[-1].rect.x
+        y2 = table.table_place_sprites.sprites()[-1].rect.y
+        x1 = table.koloda.rect.x
+        y1 = table.koloda.rect.y
+        card.get_trajectory((x1, y1), (x2, y2))
+        cards.add(card)
+        table.all_sprites.add(cards)
+        while True:
+            table.screen.fill(pygame.Color(0, 0, 0))
+            table.all_sprites.draw(table.screen)
+            cards.draw(table.screen)
+            cards.update()
+            pygame.display.flip()
+            if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                break
 
 if __name__ == '__main__':
     game = Game()
     game.run()
+
