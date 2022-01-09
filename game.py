@@ -92,15 +92,15 @@ class Game():
         self.fon.rect = fon_image.get_rect()
         robot_image = load_image('bot_head.png')
         koloda_image = load_image('Koloda_card.png')
-        self.robot_image = pygame.transform.scale(robot_image, (int(robot_image.get_width() * (WIDTH / 1920)),
-                                                                int(robot_image.get_height() * (WIDTH / 1920))))
-        self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * (WIDTH / 1920)),
-                                                                 int(koloda_image.get_height() * (WIDTH / 1920))))
+        self.robot_image = pygame.transform.scale(robot_image, (int(robot_image.get_width() * KOEF),
+                                                                int(robot_image.get_height() * KOEF)))
+        self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * KOEF),
+                                                                 int(koloda_image.get_height() * KOEF)))
 
-        self.buttons = [Button('Ва Банк', (1550, 750), termit),
-                        Button('Колл', (1550, 825), termit),
-                        Button('Пас', (1550, 900), termit),
-                        Button('Чек', (1550, 675), termit)]
+        self.buttons = [Button('Ва Банк', (WIDTH * 0.75, HEIGHT * 0.75 - 15 * KOEF), (400, 60), termit),
+                        Button('Колл', (WIDTH * 0.75, HEIGHT * 0.75 + 55 * KOEF), (400, 60), termit),
+                        Button('Пас', (WIDTH * 0.75, HEIGHT * 0.75 + 125 * KOEF), (400, 60), termit),
+                        Button('Чек', (WIDTH * 0.75, HEIGHT * 0.75 - 85 * KOEF), (400, 60), termit)]
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
         self.add_sprites()

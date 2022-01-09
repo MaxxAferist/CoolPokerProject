@@ -48,9 +48,12 @@ class Menu():
         fon_image = pygame.image.load('data//Poker_menu_2.png')
         self.fon = Beautiful_fon(fon_image)
         self.all_sprites.add(self.fon)
-        self.buttons = [Button('Новая Игра', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2), go_game),
-                    Button('Настройки', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2 + 70), go_settings),
-                    Button('Выход', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2 + 140), termit)]
+        self.buttons = [Button('Новая Игра', ((WIDTH - 450 * KOEF) // 2,
+                                              (HEIGHT - 75 * KOEF * 3 - 20 * KOEF * 2) // 2), (450, 75), go_game),
+                    Button('Настройки', ((WIDTH - 450 * KOEF) // 2,
+                                         (HEIGHT - 75 * KOEF * 3 - 20 * KOEF * 2) // 2 + 95 * KOEF), (450, 75), go_settings),
+                    Button('Выход', ((WIDTH - 450 * KOEF) // 2,
+                                     (HEIGHT - 75 * KOEF * 3 - 20 * KOEF * 2) // 2 + 190 * KOEF), (450, 75), termit)]
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
 

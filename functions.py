@@ -8,6 +8,7 @@ import random
 WIDTH = windll.user32.GetSystemMetrics(0)
 HEIGHT = windll.user32.GetSystemMetrics(1)
 FPS = 60
+KOEF = WIDTH / 1920
 
 
 def load_image(name):
@@ -32,18 +33,20 @@ def transform_image(image):
     return image
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, name, pos, action=None):
+    def __init__(self, name, pos, size, action=None):
         super(Button, self).__init__()
+        self.w = size[0]
+        self.h = size[1]
         self.name = name
-        f = pygame.font.Font(None, 36)
+        f = pygame.font.Font(None, int(48 * KOEF))
         self.text = f.render(self.name, True,
                              (0, 0, 0))
-        self.image = pygame.Surface((300, 50))
+        self.image = pygame.Surface((self.w * KOEF, self.h * KOEF))
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
-        self.image.blit(self.text, (150 - self.text.get_rect()[2] / 2, 15))
+        self.image.blit(self.text, (self.w // 2 - self.text.get_rect()[2] / 2, 15 * KOEF))
         self.click_flag = False
         self.action = action
 
@@ -52,16 +55,16 @@ class Button(pygame.sprite.Sprite):
         pressed = pygame.mouse.get_pressed()[0]
         if self.rect.collidepoint(pos) and pressed:
             self.image.fill((100, 100, 100))
-            self.image.blit(self.text, (150 - self.text.get_rect()[2] / 2, 15))
+            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
             if self.click_flag and self.action:
                 self.action()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
             self.image.fill((200, 200, 200))
-            self.image.blit(self.text, (150 - self.text.get_rect()[2] / 2, 15))
+            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
         else:
             self.image.fill((255, 255, 255))
-            self.image.blit(self.text, (150 - self.text.get_rect()[2] / 2, 15))
+            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
 
 
 class Card(pygame.sprite.Sprite):
