@@ -75,17 +75,37 @@ class Card(pygame.sprite.Sprite):
         self.rect.y = pos[1]
         self.motion_go = False
 
-    def update(self, *args):
-        if args:
-            event = args[0]
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and \
-                    self.rect.collidepoint(event.pos):
-                self.motion_go = True
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                self.motion_go = False
-            if event.type == pygame.MOUSEMOTION and self.motion_go:
-                self.rect.x += event.rel[0]
-                self.rect.y += event.rel[1]
+    def update(self):
+        pass
+
+
+class Cards_back(pygame.sprite.Sprite):
+    image = load_image('Back_card.png')
+    def __init__(self):
+        super().__init__()
+        self.image = Cards_back.image
+        self.rect = self.image.get_rect()
+        self.motion = False
+        self.k = None
+        self.b = None
+        self.v = 1
+        self.final_coords = None, None
+
+    def update(self):
+        if self.motion:
+            self.rect.x += self.v
+            self.rect.y = int(self.k * self.rect.x + self.b) # каждый кадр меняем х на 1, у соотвественно
+            if self.final_coords == (self.rect.x, self.rect.y):
+                self.motion = False
+
+
+    def get_trajectory(self, pos1, pos2): #Получаем k и b уравнения y=kx+b - траектория полета карт
+        x1, y1 = pos1
+        x2, y2 = pos2
+        self.k = (y2 - y2) / (x2 - x1)
+        self.b = y1 - self.k * x1
+        self.motion = True
+        self.final_coords = pos2
 
 
 class Place_from_card(pygame.sprite.Sprite):

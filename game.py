@@ -4,6 +4,78 @@ from functions import *
 pygame.init()
 
 
+class Poker_player():
+    def __init__(self, money):
+        self.money = money
+        self.cards = [None, None]
+        self.bid = 0
+        self.play = True
+
+    def call(self, table):
+        self.bid = max(list(map(lambda x: x.bid, table.players)))
+        self.money -= self.bid
+
+    def can_call(self, table):
+        bid = max(list(map(lambda x: x.bid, table.players)))
+        if self.money < bid:
+            return False
+        return True
+
+    def reise(self, bid):
+        self.bid = bid
+        self.money -= bid
+
+    def fold(self):
+        self.play = False
+        self.cards = [None, None]
+
+    def va_bank(self):
+        self.bid += self.money
+        self.money = 0
+
+    def check(self):
+        pass
+
+    def bet(self, bid):
+        self.bid = bid
+        self.money -= bid
+
+
+class Poker_Logic():
+    def __init__(self):
+        self.deck = self.full_deck()
+        self.bank = 0
+        self.players = []
+        self.table_cards = []
+
+    def full_deck(self):
+        values = ['2', '3', '4', '5', '6', '7', '8', '9',
+                  '10', 'J', 'Q', 'K', 'A']
+        suits = ['krest', 'pik', 'cherv', 'bubn']
+        deck = []
+        for suit in suits:
+            for value in values:
+                deck.append(Card(value, suit, (-1000, -1000)))
+        random.shuffle(deck)
+        return deck
+
+    def preflop(self):
+        for player in self.players:
+            player.cards.append(self.deck.pop())
+            player.cards.append(self.deck.pop())
+
+    def flop(self):
+        self.table_cards.append(self.deck.pop())
+        self.table_cards.append(self.deck.pop())
+        self.table_cards.append(self.deck.pop())
+
+    def tern(self):
+        self.table_cards.append(self.deck.pop())
+
+    def river(self):
+        self.table_cards.append(self.deck.pop())
+
+
 class Game():
     def __init__(self):
         pygame.display.set_caption('Game')
@@ -22,8 +94,6 @@ class Game():
         self.robot_image = pygame.transform.scale(robot_image, (int(robot_image.get_width() * (WIDTH / 1920)),
                                                                 int(robot_image.get_height() * (WIDTH / 1920))))
         self.add_sprites()
-        self.deck = self.full_deck()
-        self.card_sprites = pygame.sprite.Group()
 
 
     def run(self):
@@ -77,19 +147,6 @@ class Game():
         robot.rect.x = left_top
         robot.rect.y = up_top
 
-
-    def full_deck(self):
-        self.card_sprites = pygame.sprite.Group()
-        values = ['2', '3', '4', '5', '6', '7', '8', '9',
-                  '10', 'J', 'Q', 'K', 'A']
-        suits = ['krest', 'pik', 'cherv', 'bubn']
-        deck = []
-        for suit in suits:
-            for value in values:
-                deck.append(Card(value, suit, (-1000, -1000)))
-        random.shuffle(deck)
-        self.card_sprites.add(deck)
-        return deck
 
 if __name__ == '__main__':
     game = Game()
