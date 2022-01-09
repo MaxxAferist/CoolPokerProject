@@ -91,8 +91,18 @@ class Game():
         self.fon.image = fon_image
         self.fon.rect = fon_image.get_rect()
         robot_image = load_image('bot_head.png')
+        koloda_image = load_image('Koloda_card.png')
         self.robot_image = pygame.transform.scale(robot_image, (int(robot_image.get_width() * (WIDTH / 1920)),
                                                                 int(robot_image.get_height() * (WIDTH / 1920))))
+        self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * (WIDTH / 1920)),
+                                                                 int(koloda_image.get_height() * (WIDTH / 1920))))
+
+        self.buttons = [Button('Ва Банк', (1550, 750), termit),
+                        Button('Колл', (1550, 825), termit),
+                        Button('Пас', (1550, 900), termit),
+                        Button('Чек', (1550, 675), termit)]
+        self.all_sprites.add(self.buttons)
+        self.button_sprites.add(self.buttons)
         self.add_sprites()
 
 
@@ -100,6 +110,8 @@ class Game():
         self.running = True
         while self.running:
             for event in pygame.event.get():
+                for btn in self.buttons:
+                    btn.draw()
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.running = False
             self.all_sprites.draw(self.screen)
@@ -113,7 +125,7 @@ class Game():
         left_top = (1920 * koef - (w_card * 5 + 40 * koef * 4)) // 2
         up_top = (1080 * koef - h_card) // 4
         for i in range(5):
-            pos = left_top + i * w_card + i * 40 * koef, up_top
+            pos = left_top + i * w_card + i * 40 * koef, up_top + 175
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.table_place_sprites.add(place)
@@ -121,20 +133,18 @@ class Game():
         left_top = (1920 * koef - (w_card * 2 + 40 * koef)) // 2
         up_top = 1080 * koef - (1080 * koef - h_card) // 4 - h_card
         for i in range(2):
-            pos = left_top + i * w_card + i * 40 * koef, up_top
+            pos = left_top + i * w_card + i * 40 * koef, up_top + 75
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.player_place_sprites.add(place)
 
-        k_card = 0.75
-        w_card_k = int(Place_from_card.image.get_width() * k_card)
-        h_card_k = int(Place_from_card.image.get_height() * k_card)
+        w_card_k = int(Place_from_card.image.get_width())
+        h_card_k = int(Place_from_card.image.get_height())
         left_top = (1920 * koef - (w_card_k * 2 + 40 * koef)) // 2
         up_top = ((1080 * koef - h_card) // 4 - h_card_k) // 2
         for i in range(2):
-            pos = left_top + i * w_card_k + i * 40 * koef, up_top
+            pos = left_top + i * w_card_k + i * 40 * koef, up_top + 75
             place = Place_from_card(pos)
-            place.resize(k_card)
             self.all_sprites.add(place)
             self.bot_place_sprites.add(place)
 
@@ -142,10 +152,27 @@ class Game():
         robot.image = pygame.transform.scale(self.robot_image, (w_card_k, h_card_k))
         robot.rect = self.robot_image.get_rect()
 
-        up_top = ((1080 * koef - h_card) // 4 - h_card_k) // 2
+        up_top = ((1080 * koef - h_card) // 4 - h_card_k) // 2 + 75
         left_top = (1920 * koef - (w_card_k * 2 + 40 * koef)) // 2 - w_card_k * 1.25
         robot.rect.x = left_top
         robot.rect.y = up_top
+
+        koloda = pygame.sprite.Sprite(self.all_sprites)
+        koloda.image = pygame.transform.scale(self.koloda_image, (w_card_k, h_card_k))
+        koloda.rect = self.koloda_image.get_rect()
+
+        up_top = 390
+        left_top = 150
+        koloda.rect.x = left_top
+        koloda.rect.y = up_top
+
+
+class Game_graphic():
+    def __init__(self):
+        pass
+
+    def update(self):
+        pass
 
 
 if __name__ == '__main__':

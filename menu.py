@@ -9,6 +9,10 @@ def go_game():
     run_game = Game()
     run_game.run()
 
+def go_settings():
+    run_settings = Settings()
+    run_settings.run()
+
 
 class Beautiful_fon(pygame.sprite.Sprite):
     def __init__(self, image):
@@ -45,7 +49,7 @@ class Menu():
         self.fon = Beautiful_fon(fon_image)
         self.all_sprites.add(self.fon)
         self.buttons = [Button('Новая Игра', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2), go_game),
-                    Button('Настройки', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2 + 70)),
+                    Button('Настройки', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2 + 70), go_settings),
                     Button('Выход', ((WIDTH - 300) // 2, (HEIGHT - 50 * 3 - 20 * 2) // 2 + 140), termit)]
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
