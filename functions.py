@@ -33,20 +33,22 @@ def transform_image(image):
     return image
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, name, pos, size, action=None):
+    image = load_image('buttons//button.png')
+    def __init__(self, name, pos, size, font_size, action=None):
         super(Button, self).__init__()
         self.w = size[0]
         self.h = size[1]
         self.name = name
-        f = pygame.font.Font(None, int(48 * KOEF))
+        self.font_size = font_size * KOEF
+        self.up_top = (self.h - self.font_size) // 2
+        f = pygame.font.Font(None, int(self.font_size))
         self.text = f.render(self.name, True,
                              (0, 0, 0))
-        self.image = pygame.Surface((self.w * KOEF, self.h * KOEF))
-        self.image.fill((255, 255, 255))
+        self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
-        self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
+        self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
         self.click_flag = False
         self.pressed_flag = False
         self.action = action
@@ -55,8 +57,11 @@ class Button(pygame.sprite.Sprite):
         pos = pygame.mouse.get_pos()
         pressed = pygame.mouse.get_pressed()[0]
         if self.rect.collidepoint(pos) and pressed:
-            self.image.fill((100, 100, 100))
-            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
+            f = pygame.font.Font(None, int(self.font_size))
+            self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
+            self.text = f.render(self.name, True,
+                                 (255, 255, 0))
+            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
             self.pressed_flag = True
         elif self.rect.collidepoint(pos) and self.pressed_flag and not pressed:
             if self.click_flag and self.action:
@@ -64,12 +69,18 @@ class Button(pygame.sprite.Sprite):
                 self.action()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
-            self.image.fill((200, 200, 200))
-            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
+            f = pygame.font.Font(None, int(self.font_size))
+            self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
+            self.text = f.render(self.name, True,
+                                 (0, 162, 232))
+            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
         else:
             self.pressed_flag = False
-            self.image.fill((255, 255, 255))
-            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), 20 * KOEF))
+            f = pygame.font.Font(None, int(self.font_size))
+            self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
+            self.text = f.render(self.name, True,
+                                 (255, 255, 255))
+            self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
 
 
 class Card(pygame.sprite.Sprite):
@@ -98,8 +109,8 @@ class Cards_back(pygame.sprite.Sprite):
         self.motion = False
         self.k = None
         self.b = None
-        self.v = 10
-        self.final_coords = None, None
+        self.v = 15
+        self.final_coords = [0, 0]
 
     def update(self):
         if self.motion:
