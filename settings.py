@@ -24,16 +24,12 @@ class Settings_Rect(pygame.sprite.Sprite):
         self.image.blit(self.sound, ((700 * KOEF // 2 - self.music.get_rect()[2] / 2 - 200), 20 * KOEF + 200))
 
 
-
 class Settings():
     def __init__(self):
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
         self.all_sprites = pygame.sprite.Group()
         self.slider_sprites = pygame.sprite.Group()
-        fon_image = pygame.image.load('data//Poker_menu_2.png')
-        self.fon = Beautiful_fon(fon_image)
-        self.all_sprites.add(self.fon)
         self.setting_rect = Settings_Rect()
         self.all_sprites.add(self.setting_rect)
         self.slider_sprites.add(self.setting_rect.lst_sl)

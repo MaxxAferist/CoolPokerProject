@@ -1,4 +1,5 @@
 from game import *
+from settings import Settings
 
 
 pygame.init()
@@ -8,16 +9,18 @@ def go_menu():
     start_menu = Menu()
     start_menu.run()
 
+
 def go_game():
     run_game = Game(go_menu)
     run_game.run()
+
 
 def go_settings():
     run_settings = Settings()
     run_settings.run()
 
 
-class Beautiful_fon(pygame.sprite.Sprite):
+class Beautiful_Fon(pygame.sprite.Sprite):
     def __init__(self, image):
         super().__init__()
         self.image = pygame.transform.scale(image, (int(WIDTH * 1.3), int(HEIGHT * 1.3)))
@@ -49,7 +52,7 @@ class Menu():
         self.all_sprites = pygame.sprite.Group()
         self.button_sprites = pygame.sprite.Group()
         fon_image = pygame.image.load('data//Poker_menu_2.png')
-        self.fon = Beautiful_fon(fon_image)
+        self.fon = Beautiful_Fon(fon_image)
         self.all_sprites.add(self.fon)
         buttons_width = 400
         buttons_height = buttons_width * 0.37
