@@ -1,6 +1,7 @@
-import pygame.sprite
+import pygame
 
 from functions import *
+from mini_menu import *
 
 
 pygame.init()
@@ -79,7 +80,7 @@ class Poker_Logic():
 
 
 class Game():
-    def __init__(self):
+    def __init__(self, go_menu):
         pygame.display.set_caption('Game')
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
@@ -99,14 +100,24 @@ class Game():
         self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * KOEF),
                                                                  int(koloda_image.get_height() * KOEF)))
 
-        self.buttons = [Button('Пас', (WIDTH * 0.75, HEIGHT * 0.75 - 15 * KOEF), (400, 60), termit),
-                        Button('Чек', (WIDTH * 0.75, HEIGHT * 0.75 + 55 * KOEF), (400, 60), termit),
-                        Button('Ва-Банк', (WIDTH * 0.75, HEIGHT * 0.75 + 125 * KOEF), (400, 60), termit),
-                        Button('Райс', (WIDTH * 0.75, HEIGHT * 0.75 - 85 * KOEF), (400, 60), termit),
-                        Button('Колл', (WIDTH * 0.75, HEIGHT * 0.75 - 155 * KOEF), (400, 60), termit)]
+        buttons_width = 300
+        buttons_height = 60
+        promezh = 5
+        font_size = 50
+        self.buttons = [Button('Пас', (WIDTH * 0.8, HEIGHT * 0.75 - 15 * KOEF),
+                               (buttons_width, buttons_height), font_size, termit),
+                        Button('Чек', (WIDTH * 0.8, HEIGHT * 0.75 + 55 * KOEF),
+                               (buttons_width, buttons_height), font_size, termit),
+                        Button('Ва-Банк', (WIDTH * 0.8, HEIGHT * 0.75 + 125 * KOEF),
+                               (buttons_width, buttons_height), font_size, termit),
+                        Button('Райс', (WIDTH * 0.8, HEIGHT * 0.75 - 85 * KOEF),
+                               (buttons_width, buttons_height), font_size, termit),
+                        Button('Колл', (WIDTH * 0.8, HEIGHT * 0.75 - 155 * KOEF),
+                               (buttons_width, buttons_height), font_size, termit)]
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
         self.add_sprites()
+        self.go_menu = go_menu
 
 
     def run(self):
@@ -118,10 +129,12 @@ class Game():
         self.graph.river(self)
         while self.running:
             for event in pygame.event.get():
-                for btn in self.buttons:
-                    btn.draw()
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.running = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                    self.start_mini_menu()
+            for btn in self.buttons:
+                btn.draw()
             self.all_sprites.draw(self.screen)
             pygame.display.flip()
             self.screen.fill(pygame.Color(0, 0, 0))
@@ -175,6 +188,11 @@ class Game():
         self.koloda.rect.y = up_top
 
 
+    def start_mini_menu(self):
+        self.mini_menu = Mini_menu()
+        self.mini_menu.run(self)
+
+
 class Poker_graphic():
     def __init__(self):
         self.bank = 0
@@ -201,11 +219,18 @@ class Poker_graphic():
             cards.add(card)
         table.all_sprites.add(cards)
         while True:
-            table.screen.fill(pygame.Color(0, 0, 0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                    table.go_menu()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                    table.start_mini_menu()
+            for btn in table.buttons:
+                btn.draw()
             table.all_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
+            table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
                 break
 
@@ -221,11 +246,18 @@ class Poker_graphic():
             cards.add(card)
         table.all_sprites.add(cards)
         while True:
-            table.screen.fill(pygame.Color(0, 0, 0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                    table.go_menu()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                    table.start_mini_menu()
+            for btn in table.buttons:
+                btn.draw()
             table.all_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
+            table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
                 break
 
@@ -240,11 +272,18 @@ class Poker_graphic():
         cards.add(card)
         table.all_sprites.add(cards)
         while True:
-            table.screen.fill(pygame.Color(0, 0, 0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                    table.go_menu()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                    table.start_mini_menu()
+            for btn in table.buttons:
+                btn.draw()
             table.all_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
+            table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
                 break
 
@@ -259,15 +298,19 @@ class Poker_graphic():
         cards.add(card)
         table.all_sprites.add(cards)
         while True:
-            table.screen.fill(pygame.Color(0, 0, 0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                    table.go_menu()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                    table.start_mini_menu()
+            for btn in table.buttons:
+                btn.draw()
             table.all_sprites.draw(table.screen)
+            for btn in table.buttons:
+                btn.draw()
             cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
+            table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
                 break
-
-if __name__ == '__main__':
-    game = Game()
-    game.run()
-
