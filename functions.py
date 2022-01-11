@@ -4,7 +4,6 @@ import sys
 import os
 import random
 
-
 WIDTH = windll.user32.GetSystemMetrics(0)
 HEIGHT = windll.user32.GetSystemMetrics(1)
 FPS = 60
@@ -24,6 +23,7 @@ def termit():
     pygame.quit()
     sys.exit()
 
+
 def transform_image(image):
     rect = image.get_rect()
     w = rect.w
@@ -31,6 +31,7 @@ def transform_image(image):
     koef = WIDTH / 1920
     image = pygame.transform.scale(image, (int(w * koef), (h * koef)))
     return image
+
 
 class Button(pygame.sprite.Sprite):
     def __init__(self, name, pos, size, action=None):
@@ -89,6 +90,7 @@ class Card(pygame.sprite.Sprite):
 
 class Cards_back(pygame.sprite.Sprite):
     image = load_image('Back_card.png')
+
     def __init__(self):
         super().__init__()
         self.image = Cards_back.image
@@ -104,13 +106,13 @@ class Cards_back(pygame.sprite.Sprite):
     def update(self):
         if self.motion:
             self.rect.x += self.v
-            self.rect.y = int(self.k * self.rect.x + self.b) # каждый кадр меняем х на 1, у соотвественно
+            self.rect.y = int(self.k * self.rect.x + self.b)  # каждый кадр меняем х на 1, у соотвественно
             if self.rect.x in range(self.final_coords[0] - self.v, self.final_coords[0] + self.v):
                 self.rect.x = self.final_coords[0]
                 self.rect.y = self.final_coords[1]
                 self.motion = False
 
-    def get_trajectory(self, pos1, pos2): #Получаем k и b уравнения y=kx+b - траектория полета карт
+    def get_trajectory(self, pos1, pos2):  # Получаем k и b уравнения y=kx+b - траектория полета карт
         x1, y1 = pos1
         x2, y2 = pos2
         self.rect.x = x1
@@ -138,3 +140,27 @@ class Place_from_card(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+
+class Slider(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((600, 20))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Slider_Ball(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((20, 50))
+        self.image.fill((0, 0, 255))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def clicked(self, pos):
+        if self.rect.collidepoint(pos):
+            return True

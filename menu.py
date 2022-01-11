@@ -1,6 +1,6 @@
 from game import *
 import pygame
-
+from settings import *
 
 pygame.init()
 
