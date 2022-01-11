@@ -4,24 +4,22 @@ from functions import Slider, Slider_Ball
 
 
 class Settings_Rect(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, image):
         super(Settings_Rect, self).__init__()
-        self.image = pygame.Surface((700, 400))
+        self.image = pygame.transform.scale(image, (700, 444))
         self.rect = self.image.get_rect()
-        self.image.fill((255, 128, 0))
         self.rect.x = WIDTH // 2 - 350
         self.rect.y = HEIGHT // 2 - 200
-        self.stat_x, self.stat_y = 0, 0
         f = pygame.font.Font(None, int(48 * KOEF))
         self.music = f.render('Музыка', True,
-                              (0, 0, 0))
+                              (255, 255, 255))
         self.sound = f.render('Звуки', True,
-                              (0, 0, 0))
+                              (255, 255, 255))
         self.lst_sl = [Slider(980, 646), Slider(980, 846)]
         self.lst_sl_bl = [Slider_Ball(980, 631), Slider_Ball(980, 831)]
 
-        self.image.blit(self.music, ((700 * KOEF // 2 - self.music.get_rect()[2] / 2 - 200), 20 * KOEF))
-        self.image.blit(self.sound, ((700 * KOEF // 2 - self.music.get_rect()[2] / 2 - 200), 20 * KOEF + 200))
+        self.image.blit(self.music, ((700 * KOEF // 2 - self.music.get_rect()[2] / 2 - 100), 20 * KOEF))
+        self.image.blit(self.sound, ((700 * KOEF // 2 - self.music.get_rect()[2] / 2 - 100), 20 * KOEF + 200))
 
 
 class Settings():
@@ -30,7 +28,8 @@ class Settings():
         self.clock = pygame.time.Clock()
         self.all_sprites = pygame.sprite.Group()
         self.slider_sprites = pygame.sprite.Group()
-        self.setting_rect = Settings_Rect()
+        fon = pygame.image.load('data//buttons//set_button.png')
+        self.setting_rect = Settings_Rect(fon)
         self.all_sprites.add(self.setting_rect)
         self.slider_sprites.add(self.setting_rect.lst_sl)
         self.slider_sprites.add(self.setting_rect.lst_sl_bl)

@@ -167,7 +167,7 @@ class Slider_Ball(pygame.sprite.Sprite):
         super().__init__()
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((20, 50))
-        self.image.fill((0, 0, 255))
+        self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
