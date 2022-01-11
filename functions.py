@@ -154,24 +154,49 @@ class Place_from_card(pygame.sprite.Sprite):
 
 
 class Slider(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    image = load_image('buttons//slider.png')
+    def __init__(self, x, y, type, len, other):
         super().__init__()
-        self.image = pygame.Surface((600, 20))
+        self.len = len
+        self.type = type
+        self.line_width = 20 * KOEF
+        if self.type == 'vertical':
+            self.image = pygame.transform.rotate(pygame.transform.scale(Slider.image, (20, 50)), 90)
+            line_image = pygame.Surface((self.line_width, self.len))
+            self.line = pygame.sprite.Sprite()
+            self.line.image = line_image
+            self.line.rect = line_image.get_rect()
+        elif self.type == 'gorizontal':
+            self.image = pygame.transform.scale(Slider.image, (20, 50))
+            line_image = pygame.Surface((self.len, self.line_width))
+            self.line = pygame.sprite.Sprite()
+            self.line.image = line_image
+            self.line.rect = line_image.get_rect()
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = x + other.fon.rect.x
+        self.rect.y = y + other.fon.rect.y
+        if self.type == 'gorizontal':
+            self.line.rect.x = self.rect.x
+            self.line.rect.y = (self.rect.h - self.line.rect.h) // 2 + self.rect.y
+        elif self.type == 'vertical':
+            self.line.rect.x = (self.rect.x - self.line_width) // 2
+            self.line.rect.y = self.rect.y
+        self.click_flag = False
+        other.all_sprites.add(self.line, self)
 
-
-class Slider_Ball(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((20, 50))
-        self.image.fill((255, 255, 255))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-    def clicked(self, pos):
-        if self.rect.collidepoint(pos):
-            return True
+    def update(self):
+        pressed = pygame.mouse.get_pressed()[0]
+        pos = pygame.mouse.get_pos()
+        if self.click_flag and pressed:
+            if self.type == 'gorizontal':
+                if pos[0] >= self.line.rect.x + self.rect.w // 2 and \
+                    pos[0] <= self.line.rect.x + self.line .rect.w - self.rect.w // 2:
+                    self.rect.centerx = pos[0]
+            elif self.type == 'vertical':
+                if pos[1] >= self.line.rect.y + self.rect.h // 2 and \
+                        pos[1] <= self.line.rect.y + self.line.rect.h - self.rect.h // 2:
+                    self.rect.centery = pos[1]
+        elif self.rect.collidepoint(pos):
+            self.click_flag = True
+        else:
+            self.click_flag = False

@@ -15,9 +15,9 @@ def go_game():
     run_game.run()
 
 
-def go_settings():
+def go_settings(other):
     run_settings = Settings()
-    run_settings.run()
+    run_settings.run(other)
 
 
 class Beautiful_Fon(pygame.sprite.Sprite):
@@ -62,7 +62,7 @@ class Menu():
                                (buttons_width, buttons_height), 70, go_game),
                     Button('Настройки', ((WIDTH - buttons_width * KOEF) // 2,
                                          (HEIGHT - buttons_height * KOEF * 3 - promezh * KOEF * 2) // 2 + (promezh + buttons_height) * KOEF),
-                           (buttons_width, buttons_height), 70, go_settings),
+                           (buttons_width, buttons_height), 70, lambda: go_settings(self)),
                     Button('Выход', ((WIDTH - buttons_width * KOEF) // 2,
                                      (HEIGHT - buttons_height * KOEF * 3 - promezh * KOEF * 2) // 2 + (promezh + buttons_height) * 2 * KOEF),
                            (buttons_width, buttons_height), 70, termit)]

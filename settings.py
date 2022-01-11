@@ -1,76 +1,46 @@
-from menu import *
 import pygame
-from functions import Slider, Slider_Ball
-
-
-class Settings_Rect(pygame.sprite.Sprite):
-    def __init__(self, image):
-        super(Settings_Rect, self).__init__()
-        self.image = pygame.transform.scale(image, (700, 444))
-        self.rect = self.image.get_rect()
-        self.rect.x = WIDTH // 2 - 350
-        self.rect.y = HEIGHT // 2 - 200
-        f = pygame.font.Font(None, int(48 * KOEF))
-        self.music = f.render('Музыка', True,
-                              (255, 255, 255))
-        self.sound = f.render('Звуки', True,
-                              (255, 255, 255))
-        self.lst_sl = [Slider(980, 646), Slider(980, 846)]
-        self.lst_sl_bl = [Slider_Ball(980, 631), Slider_Ball(980, 831)]
-
-        self.image.blit(self.music, ((700 * KOEF // 2 - self.music.get_rect()[2] / 2 - 100), 20 * KOEF))
-        self.image.blit(self.sound, ((700 * KOEF // 2 - self.music.get_rect()[2] / 2 - 100), 20 * KOEF + 200))
+from functions import *
 
 
 class Settings():
     def __init__(self):
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.clock = pygame.time.Clock()
         self.all_sprites = pygame.sprite.Group()
-        self.slider_sprites = pygame.sprite.Group()
-        fon = pygame.image.load('data//buttons//set_button.png')
-        self.setting_rect = Settings_Rect(fon)
-        self.all_sprites.add(self.setting_rect)
-        self.slider_sprites.add(self.setting_rect.lst_sl)
-        self.slider_sprites.add(self.setting_rect.lst_sl_bl)
-        self.lst_sl = self.setting_rect.lst_sl
-        self.lst_sl_bl = self.setting_rect.lst_sl_bl
-        self.num = 0
-        self.moving = False
-        self.all_sprites.add(self.slider_sprites)
+        self.fon = pygame.sprite.Sprite(self.all_sprites)
+        fon = load_image('buttons//settings.png')
+        self.fon.image = pygame.transform.scale(fon, (WIDTH // 3, HEIGHT // 3))
+        self.fon.rect = fon.get_rect()
+        self.fon.rect.x = (WIDTH - self.fon.rect.w) // 2
+        self.fon.rect.y = (HEIGHT - self.fon.rect.h) // 2
 
-    def run(self):
+        f = pygame.font.Font(None, int(48 * KOEF))
+        self.music = f.render('Музыка', True,
+                              (255, 255, 255))
+        self.fon.image.blit(self.music, (((self.fon.rect.w - self.music.get_rect()[2]) // 2 - 30 * KOEF),
+                                         (self.fon.rect.h - self.music.get_rect()[3]) * 0.25))
+        self.music_slider = Slider((self.fon.rect.w - self.music.get_rect()[2]) // 2 - 100 * KOEF,
+                                   (self.fon.rect.h - self.music.get_rect()[3]) * 0.37,
+                                   'gorizontal', 300 * KOEF, self)
+
+        self.sound = f.render('Звуки', True,
+                              (255, 255, 255))
+        self.fon.image.blit(self.sound, (((self.fon.rect.w - self.music.get_rect()[2]) // 2 - 30 * KOEF),
+                                         (self.fon.rect.h - self.music.get_rect()[3]) * 0.6))
+        self.sound_slider = Slider((self.fon.rect.w - self.music.get_rect()[2]) // 2 - 100 * KOEF,
+                                   (self.fon.rect.h - self.music.get_rect()[3]) * 0.72,
+                                   'gorizontal', 300 * KOEF, self)
+        self.clock = pygame.time.Clock()
         self.running = True
-        offset_x = 0
+
+    def run(self, other):
         while self.running:
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    for i in range(len(self.lst_sl)):
-                        pos = event.pos
-                        if self.lst_sl_bl[i].clicked(pos):
-                            self.num = i
-                            self.moving = True
-                            offset_x = self.lst_sl_bl[self.num].rect.x - pos[0]
-
-                if event.type == pygame.MOUSEMOTION:
-                    pos = event.pos
-                    if self.moving:
-                        if 980 > pos[0] + offset_x:
-                            offset_x = 980 - pos[0]
-                        elif 1560 < pos[0] + offset_x:
-                            offset_x = 1560 - pos[0]
-                        self.lst_sl_bl[self.num].rect.x = pos[0] + offset_x
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    self.moving = False
-            self.all_sprites.draw(self.screen)
+                if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    self.running = False
+            other.all_sprites.draw(other.screen)
+            other.all_sprites.update()
+            self.all_sprites.draw(other.screen)
             self.all_sprites.update()
             pygame.display.flip()
             self.clock.tick(FPS)
+            other.screen.fill(pygame.Color(0, 0, 0))
 
-
-if __name__ == '__main__':
-    settings = Settings()
-    settings.run()
