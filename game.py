@@ -94,8 +94,6 @@ class Poker_Logic():
         elif person == 'bot':
             your_cards = [(self.players[1][2].value, self.players[1][2].suit),
                           (self.players[1][3].value, self.players[1][3].suit)]
-        cards = [('9', 'cherv'), ('9', 'krest'), ('A', 'krest'), ('J', 'pik'), ('10', 'cherv')]
-        your_cards = [('10', 'krest'), ('9', 'bubn')]
         all_values = [i[0] for i in your_cards + cards]
         all_suits = [i[1] for i in your_cards + cards]
         card_suits = [i[1] for i in cards]
