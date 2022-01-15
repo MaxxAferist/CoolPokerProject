@@ -3,7 +3,6 @@ import pygame
 from functions import *
 from mini_menu import *
 
-
 pygame.init()
 
 
@@ -64,8 +63,8 @@ class Poker_Logic():
 
     def preflop(self):
         for player in self.players:
-            player.cards.append(self.deck.pop())
-            player.cards.append(self.deck.pop())
+            player.append(self.deck.pop())
+            player.append(self.deck.pop())
 
     def flop(self):
         self.table_cards.append(self.deck.pop())
@@ -77,6 +76,108 @@ class Poker_Logic():
 
     def river(self):
         self.table_cards.append(self.deck.pop())
+
+    def check(self, person):
+        values = ['2', '3', '4', '5', '6', '7', '8', '9',
+                  '10', 'J', 'Q', 'K', 'A']
+        cards = []
+        your_cards = []
+        your_combunations = []
+        combinations = ['royal flush', 'straight flush', 'four of kind',
+                        'full house', 'flush', 'straight', 'three of kind',
+                        'two pair', 'pair', 'high card']
+        for i in self.table_cards:
+            cards.append((i.value, i.suit))
+        if person == 'player':
+            your_cards = [(self.players[0][2].value, self.players[0][2].suit),
+                          (self.players[0][3].value, self.players[0][3].suit)]
+        elif person == 'bot':
+            your_cards = [(self.players[1][2].value, self.players[1][2].suit),
+                          (self.players[1][3].value, self.players[1][3].suit)]
+        cards = [('9', 'cherv'), ('9', 'krest'), ('A', 'krest'), ('J', 'pik'), ('10', 'cherv')]
+        your_cards = [('10', 'krest'), ('9', 'bubn')]
+        all_values = [i[0] for i in your_cards + cards]
+        all_suits = [i[1] for i in your_cards + cards]
+        card_suits = [i[1] for i in cards]
+        card_val = [i[0] for i in cards]
+        swap = True
+        while swap:
+            swap = False
+            for i in range(len(all_values) - 1):
+                if values.index(all_values[i]) > values.index(all_values[i + 1]):
+                    all_values[i], all_values[i + 1] = all_values[i + 1], all_values[i]
+                    swap = True
+        while swap:
+            swap = False
+            for i in range(len(card_val) - 1):
+                if values.index(card_val[i]) > values.index(card_val[i + 1]):
+                    card_val[i], card_val[i + 1] = card_val[i + 1], card_val[i]
+                    swap = True
+        no_rep_all_val = []
+        for i in all_values:
+            if i not in no_rep_all_val:
+                no_rep_all_val.append(i)
+        no_rep_card = []
+        for i in card_val:
+            if i not in no_rep_card:
+                no_rep_card.append(i)
+        print(cards, your_cards)
+        lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
+        # флеш рояль
+        if (len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) == 5) and \
+                (len(lst_straight) == 5 and lst_straight[0] == '10'):
+            your_combunations.append(combinations[0])
+            return your_combunations
+        # стрит флеш
+        if (len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) == 5) and \
+                (len(lst_straight) == 5):
+            your_combunations.append(combinations[1])
+            return your_combunations
+        # каре
+        if self.intersection(all_values, card_val, 4) == 1:
+            your_combunations.append(combinations[2])
+        # фулхаус
+        if self.intersection(all_values, card_val, 3) == 1 and self.intersection(all_values, card_val, 2) == 1:
+            your_combunations.append(combinations[3])
+            return your_combunations
+        # флеш
+        if len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) == 5:
+            your_combunations.append(combinations[4])
+        # стрит
+        if len(lst_straight) == 5:
+            your_combunations.append(combinations[5])
+            return your_combunations
+        # сет(тройка)
+        if self.intersection(all_values, card_val, 3) == 1:
+            your_combunations.append(combinations[6])
+        # 2 пары
+        if self.intersection(all_values, card_val, 2) == 2:
+            your_combunations.append(combinations[7])
+        # пара
+        if self.intersection(all_values, card_val, 2) == 1:
+            your_combunations.append(combinations[8])
+        # большая карта
+        if max([values.index(i) for i in card_val]) < max([values.index(i) for i in [j for j in all_values if j not in card_val]]):
+            your_combunations.append(combinations[9])
+
+        return your_combunations
+
+    def intersection(self, all_cards, table_cards, count):
+
+        all_cards = set([i for i in all_cards if all_cards.count(i) >= count])
+        table_cards = set([i for i in table_cards if table_cards.count(i) >= count])
+        if len(all_cards) > len(table_cards):
+            return len(all_cards) - len(table_cards)
+        return 0
+
+    def straight_check(self, all_cards, table_cards, values):
+        for i in range(len(all_cards), 0, -1):
+            if ''.join(all_cards[i-5:i]) in ''.join(values):
+                lst_straight = all_cards[i-5:i]
+                if ''.join(table_cards[i-5:i]) in ''.join(values):
+                    return [0]
+                return lst_straight
+        return [0]
 
 
 class Game():
@@ -98,7 +199,7 @@ class Game():
         self.robot_image = pygame.transform.scale(robot_image, (int(robot_image.get_width() * KOEF),
                                                                 int(robot_image.get_height() * KOEF)))
         self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * KOEF),
-                                                                 int(koloda_image.get_height() * KOEF)))
+                                                                  int(koloda_image.get_height() * KOEF)))
 
         buttons_width = 300
         buttons_height = 60
@@ -117,16 +218,18 @@ class Game():
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
         self.add_sprites()
+        self.logic = Poker_Logic()
+        self.logic.players = [[1000, 'player'], [1000, 'bot']]
+        self.logic.preflop()
+        self.logic.flop()
+        self.logic.tern()
+        self.logic.river()
+        print(self.logic.check('player'))
         self.go_menu = go_menu
-
 
     def run(self):
         self.running = True
         self.graph = Poker_graphic()
-        self.graph.preflop(self)
-        self.graph.flop(self)
-        self.graph.tern(self)
-        self.graph.river(self)
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -186,7 +289,6 @@ class Game():
         left_top = (WIDTH - self.koloda.rect.w) * 0.05
         self.koloda.rect.x = left_top
         self.koloda.rect.y = up_top
-
 
     def start_mini_menu(self):
         self.mini_menu = Mini_menu()
