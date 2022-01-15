@@ -155,7 +155,7 @@ class Poker_Logic():
         if self.intersection(all_values, card_val, 2) == 1:
             your_combunations.append(combinations[8])
         # большая карта
-        if max([values.index(i) for i in card_val]) < max([values.index(i) for i in [j for j in all_values if j not in card_val]]):
+        if max([values.index(i) for i in card_val]) < max([values.index(i) for i in [j[0] for j in your_cards]]):
             your_combunations.append(combinations[9])
 
         return your_combunations
