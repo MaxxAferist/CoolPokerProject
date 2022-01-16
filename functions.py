@@ -111,7 +111,7 @@ class Cards_back(pygame.sprite.Sprite): #Рубашка карт
         self.motion = False
         self.k = None
         self.b = None
-        self.v = 15
+        self.v = 20
         self.final_coords = [0, 0]
 
     def update(self):
