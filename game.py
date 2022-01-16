@@ -3,11 +3,10 @@ import pygame
 from functions import *
 from mini_menu import *
 
-
 pygame.init()
 
 
-class Poker_player(): #Класс игрока покера
+class Poker_player():  # Класс игрока покера
     def __init__(self, money, player_type):
         self.money = money
         self.cards = [None, None]
@@ -16,7 +15,7 @@ class Poker_player(): #Класс игрока покера
         self.move = False
         self.player_type = player_type
 
-    def call(self, table): #Ставка, равная наибольшей ставке на столе
+    def call(self, table):  # Ставка, равная наибольшей ставке на столе
         self.bid += max(list(map(lambda x: x.bid, table.players))) - self.bid
         self.move = False
         print(self.bid)
@@ -27,20 +26,20 @@ class Poker_player(): #Класс игрока покера
             return False
         return True
 
-    def reise(self, bid): #Ставка, большая чем самая большая
+    def reise(self, bid):  # Ставка, большая чем самая большая
         self.bid += bid
         self.move = False
 
-    def fold(self): #Пас
+    def fold(self):  # Пас
         self.play = False
         self.cards = [None, None]
         self.move = False
 
-    def va_bank(self): #Ва-банк
+    def va_bank(self):  # Ва-банк
         self.bid = self.money
         self.move = False
 
-    def check(self): #Пропуск ставки
+    def check(self):  # Пропуск ставки
         self.move = False
 
     def bet(self, bid):
@@ -56,14 +55,14 @@ class Poker_player(): #Класс игрока покера
         self.move = False
 
 
-class Poker_Logic(): # Логика покера
+class Poker_Logic():  # Логика покера
     def __init__(self):
         self.deck = self.full_deck()
         self.bank = 0
         self.players = []
         self.table_cards = []
 
-    def full_deck(self): # Полная перемешанная колода карт
+    def full_deck(self):  # Полная перемешанная колода карт
         values = ['2', '3', '4', '5', '6', '7', '8', '9',
                   '10', 'J', 'Q', 'K', 'A']
         suits = ['krest', 'pik', 'cherv', 'bubn']
@@ -74,13 +73,13 @@ class Poker_Logic(): # Логика покера
         random.shuffle(deck)
         return deck
 
-    def preflop(self): # Выдача карт игрокам
+    def preflop(self):  # Выдача карт игрокам
         for player in self.players:
             self.bank += player.bid
             player.bid = 0
             player.cards = [self.deck.pop(), self.deck.pop()]
 
-    def flop(self): # 3 карты на стол
+    def flop(self):  # 3 карты на стол
         for player in self.players:
             self.bank += player.bid
             player.money -= player.bid
@@ -89,14 +88,14 @@ class Poker_Logic(): # Логика покера
         self.table_cards.append(self.deck.pop())
         self.table_cards.append(self.deck.pop())
 
-    def tern(self): # 4-ая карта на стол
+    def tern(self):  # 4-ая карта на стол
         for player in self.players:
             self.bank += player.bid
             player.money -= player.bid
             player.bid = 0
         self.table_cards.append(self.deck.pop())
 
-    def river(self): # 5-ая карта на стол
+    def river(self):  # 5-ая карта на стол
         for player in self.players:
             self.bank += player.bid
             player.money -= player.bid
@@ -105,7 +104,7 @@ class Poker_Logic(): # Логика покера
 
     def max_bid(self):
         return max(list(map(lambda x: x.bid, self.players)))
-    
+
     def check(self, player):
         values = ['2', '3', '4', '5', '6', '7', '8', '9',
                   '10', 'J', 'Q', 'K', 'A']
@@ -117,7 +116,9 @@ class Poker_Logic(): # Логика покера
         for i in self.table_cards:
             cards.append((i.value, i.suit))
         your_cards = [(player.cards[0].value, player.cards[0].suit),
-                        (player.cards[1].value, player.cards[1].suit)]
+                      (player.cards[1].value, player.cards[1].suit)]
+        your_cards = [('3', 'pik'), ('4', 'pik')]
+        cards = [('5', 'pik'), ('6', 'pik'), ('7', 'pik'), ('9', 'pik'), ('8', 'pik')]
         all_values = [i[0] for i in your_cards + cards]
         all_suits = [i[1] for i in your_cards + cards]
         card_suits = [i[1] for i in cards]
@@ -143,16 +144,17 @@ class Poker_Logic(): # Логика покера
         for i in card_val:
             if i not in no_rep_card:
                 no_rep_card.append(i)
-        print(cards)
-        print(your_cards)
+        print(cards, your_cards, sep='\n')
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
+        print(lst_straight)
+
         # Флеш рояль
-        if (len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) == 5) and \
+        if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
                 (len(lst_straight) == 5 and lst_straight[0] == '10'):
             your_combunations.append(combinations[0])
             return your_combunations
         # Стрит флеш
-        if (len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) == 5) and \
+        if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
                 (len(lst_straight) == 5):
             your_combunations.append(combinations[1])
             return your_combunations
@@ -164,7 +166,7 @@ class Poker_Logic(): # Логика покера
             your_combunations.append(combinations[3])
             return your_combunations
         # Флеш(энергетик)
-        if len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) == 5:
+        if (len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2:
             your_combunations.append(combinations[4])
         # Стрит(улица)
         if len(lst_straight) == 5:
@@ -180,8 +182,7 @@ class Poker_Logic(): # Логика покера
         if self.intersection(all_values, card_val, 2) == 1:
             your_combunations.append(combinations[8])
         # Старшая карта
-        if max([values.index(i) for i in card_val]) < max([values.index(i) for i in [j[0] for j in your_cards]]):
-            your_combunations.append(combinations[9])
+        your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
 
         return your_combunations
 
@@ -194,9 +195,9 @@ class Poker_Logic(): # Логика покера
 
     def straight_check(self, all_cards, table_cards, values):
         for i in range(len(all_cards), 0, -1):
-            if ''.join(all_cards[i-5:i]) in ''.join(values):
-                lst_straight = all_cards[i-5:i]
-                if ''.join(table_cards[i-5:i]) in ''.join(values):
+            if ''.join(all_cards[i - 5:i]) in ''.join(values):
+                lst_straight = all_cards[i - 5:i]
+                if ''.join(table_cards[i - 5:i]) in ''.join(values):
                     return [0]
                 return lst_straight
         return [0]
@@ -213,7 +214,7 @@ class Poker_Logic(): # Логика покера
         return cards
 
 
-class Game(): # Игра
+class Game():  # Игра
     def __init__(self, go_menu):
         pygame.display.set_caption('Game')
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -350,7 +351,7 @@ class Game(): # Игра
                 print(self.players[i].bid)
                 break
 
-    def add_sprites(self): # Все спрайты на столе
+    def add_sprites(self):  # Все спрайты на столе
         w_card = Place_from_card.image.get_width()
         h_card = Place_from_card.image.get_height()
         left_top = (WIDTH - (w_card * 5 + 40 * KOEF * 4)) // 2
