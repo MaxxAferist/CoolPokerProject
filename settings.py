@@ -5,6 +5,7 @@ from functions import *
 class Settings():
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
+        self.stack_sprites = pygame.sprite.Group()
         self.fon = pygame.sprite.Sprite(self.all_sprites)
         fon = load_image('buttons//settings.png')
         self.fon.image = pygame.transform.scale(fon, (WIDTH // 3, HEIGHT // 3))
@@ -40,6 +41,8 @@ class Settings():
             other.all_sprites.update()
             self.all_sprites.draw(other.screen)
             self.all_sprites.update()
+            self.stack_sprites.draw(other.screen)
+            self.stack_sprites.update()
             pygame.display.flip()
             self.clock.tick(FPS)
             other.screen.fill(pygame.Color(0, 0, 0))

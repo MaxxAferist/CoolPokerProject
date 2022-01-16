@@ -10,7 +10,7 @@ FPS = 60
 KOEF = WIDTH / 1920
 
 
-def load_image(name):
+def load_image(name): #Загрузка картинки
     filename = os.path.join('data', name)
     if not os.path.isfile(filename):
         print(f'Image is not found: {filename}')
@@ -19,12 +19,12 @@ def load_image(name):
     return image
 
 
-def termit():
+def termit(): #Выход
     pygame.quit()
     sys.exit()
 
 
-def transform_image(image):
+def transform_image(image): #Трансформация картинки
     rect = image.get_rect()
     w = rect.w
     h = rect.h
@@ -33,7 +33,7 @@ def transform_image(image):
     return image
 
 
-class Button(pygame.sprite.Sprite):
+class Button(pygame.sprite.Sprite): #Класс кнопок
     image = load_image('buttons//button.png')
     def __init__(self, name, pos, size, font_size, action=None):
         super(Button, self).__init__()
@@ -84,7 +84,7 @@ class Button(pygame.sprite.Sprite):
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
 
 
-class Card(pygame.sprite.Sprite):
+class Card(pygame.sprite.Sprite): #Класс карт
     def __init__(self, value, suit, pos):
         super().__init__()
         self.value = value
@@ -99,7 +99,7 @@ class Card(pygame.sprite.Sprite):
         pass
 
 
-class Cards_back(pygame.sprite.Sprite):
+class Cards_back(pygame.sprite.Sprite): #Рубашка карт
     image = load_image('Back_card.png')
 
     def __init__(self):
@@ -134,7 +134,7 @@ class Cards_back(pygame.sprite.Sprite):
         self.final_coords = pos2
 
 
-class Place_from_card(pygame.sprite.Sprite):
+class Place_from_card(pygame.sprite.Sprite): #Место для карты
     image = load_image('place_from_card.png')
 
     def __init__(self, pos):
@@ -153,13 +153,15 @@ class Place_from_card(pygame.sprite.Sprite):
         self.rect.y = y
 
 
-class Slider(pygame.sprite.Sprite):
+class Slider(pygame.sprite.Sprite): #Класс слайдеров
     image = load_image('buttons//slider.png')
     def __init__(self, x, y, type, len, other):
         super().__init__()
         self.len = len
         self.type = type
         self.line_width = 20 * KOEF
+        self.x0 = x + other.fon.rect.x
+        self.y0 = y + other.fon.rect.y
         if self.type == 'vertical':
             self.image = pygame.transform.rotate(pygame.transform.scale(Slider.image, (20, 50)), 90)
             line_image = pygame.Surface((self.line_width, self.len))
@@ -167,7 +169,7 @@ class Slider(pygame.sprite.Sprite):
             self.line.image = line_image
             self.line.rect = line_image.get_rect()
         elif self.type == 'gorizontal':
-            self.image = pygame.transform.scale(Slider.image, (20, 50))
+            self.image = pygame.transform.scale(Slider.image, (20 * KOEF, 50 * KOEF))
             line_image = pygame.Surface((self.len, self.line_width))
             self.line = pygame.sprite.Sprite()
             self.line.image = line_image
@@ -179,24 +181,34 @@ class Slider(pygame.sprite.Sprite):
             self.line.rect.x = self.rect.x
             self.line.rect.y = (self.rect.h - self.line.rect.h) // 2 + self.rect.y
         elif self.type == 'vertical':
-            self.line.rect.x = (self.rect.x - self.line_width) // 2
-            self.line.rect.y = self.rect.y
+            self.line.rect.x = (self.rect.w - self.line.rect.w) // 2 + self.rect.x
+            self.line.rect.y = self.rect.y - (self.line.rect.h - self.rect.h)
         self.click_flag = False
-        other.all_sprites.add(self.line, self)
+        other.stack_sprites.add(self.line, self)
+        self.value = 0
 
     def update(self):
         pressed = pygame.mouse.get_pressed()[0]
         pos = pygame.mouse.get_pos()
         if self.click_flag and pressed:
             if self.type == 'gorizontal':
-                if pos[0] >= self.line.rect.x + self.rect.w // 2 and \
-                    pos[0] <= self.line.rect.x + self.line .rect.w - self.rect.w // 2:
+                if pos[0] > self.line.rect.x + self.rect.w // 2 and \
+                    pos[0] < self.line.rect.x + self.line .rect.w - self.rect.w // 2:
                     self.rect.centerx = pos[0]
+                    self.change_value()
             elif self.type == 'vertical':
                 if pos[1] >= self.line.rect.y + self.rect.h // 2 and \
                         pos[1] <= self.line.rect.y + self.line.rect.h - self.rect.h // 2:
                     self.rect.centery = pos[1]
+                    self.change_value()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
         else:
             self.click_flag = False
+
+    def change_value(self):
+        if self.type == 'gorizontal':
+            self.value = (self.rect.x - self.x0) / (self.len - self.rect.w)
+        elif self.type == 'vertical':
+            self.value = (self.y0 - self.rect.y) / (self.len - self.rect.h)
+        self.value = round(self.value, 2)
