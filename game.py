@@ -119,7 +119,8 @@ class Poker_Logic():
         for i in card_val:
             if i not in no_rep_card:
                 no_rep_card.append(i)
-        print(cards, your_cards)
+        print(cards)
+        print(your_cards)
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
         # флеш рояль
         if (len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) == 5) and \
@@ -177,6 +178,19 @@ class Poker_Logic():
                 return lst_straight
         return [0]
 
+    def request_cards(self, person):
+        if person == 'player':
+            cards = [(self.players[0][2].value, self.players[0][2].suit),
+                        (self.players[0][3].value, self.players[0][3].suit)]
+        elif person == 'bot':
+            cards = [(self.players[1][2].value, self.players[1][2].suit),
+                        (self.players[1][3].value, self.players[1][3].suit)]
+        elif person == 'table':
+            cards = []
+            for i in self.table_cards:
+                cards.append((i.value, i.suit))
+        return cards
+
 
 class Game():
     def __init__(self, go_menu):
@@ -222,6 +236,13 @@ class Game():
         self.logic.flop()
         self.logic.tern()
         self.logic.river()
+        cards = self.logic.request_cards('player')
+        table_cards = self.logic.request_cards('table')
+        self.graph = Poker_graphic()
+        self.graph.preflop(self, cards)
+        self.graph.flop(self, table_cards)
+        self.graph.tern(self, table_cards)
+        self.graph.river(self, table_cards)
         print(self.logic.check('player'))
         self.go_menu = go_menu
 
@@ -299,7 +320,7 @@ class Poker_graphic():
         self.table_cards = pygame.sprite.Group()
         self.players_cards = pygame.sprite.Group()
 
-    def preflop(self, table):
+    def preflop(self, table, player_cards):
         cards = pygame.sprite.Group()
         for i in range(2):
             card = Cards_back()
@@ -332,9 +353,17 @@ class Poker_graphic():
             pygame.display.flip()
             table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                for i in range(2):
+                    x = table.player_place_sprites.sprites()[i].rect.x
+                    y = table.player_place_sprites.sprites()[i].rect.y
+                    value = player_cards[i][0]
+                    suit = player_cards[i][1]
+                    player_card = Card(value, suit, (x, y))
+                    table.all_sprites.add(player_card)
+                    table.all_sprites.draw(table.screen)
                 break
 
-    def flop(self, table):
+    def flop(self, table, table_cards):
         cards = pygame.sprite.Group()
         for i in range(3):
             card = Cards_back()
@@ -359,9 +388,17 @@ class Poker_graphic():
             pygame.display.flip()
             table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                for i in range(3):
+                    x = table.table_place_sprites.sprites()[i].rect.x
+                    y = table.table_place_sprites.sprites()[i].rect.y
+                    value = table_cards[i][0]
+                    suit = table_cards[i][1]
+                    table_card = Card(value, suit, (x, y))
+                    table.all_sprites.add(table_card)
+                    table.all_sprites.draw(table.screen)
                 break
 
-    def tern(self, table):
+    def tern(self, table, table_cards):
         cards = pygame.sprite.Group()
         card = Cards_back()
         x2 = table.table_place_sprites.sprites()[-2].rect.x
@@ -385,9 +422,16 @@ class Poker_graphic():
             pygame.display.flip()
             table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                x = table.table_place_sprites.sprites()[-2].rect.x
+                y = table.table_place_sprites.sprites()[-2].rect.y
+                value = table_cards[-2][0]
+                suit = table_cards[-2][1]
+                table_card = Card(value, suit, (x, y))
+                table.all_sprites.add(table_card)
+                table.all_sprites.draw(table.screen)
                 break
 
-    def river(self, table):
+    def river(self, table, table_cards):
         cards = pygame.sprite.Group()
         card = Cards_back()
         x2 = table.table_place_sprites.sprites()[-1].rect.x
@@ -413,4 +457,11 @@ class Poker_graphic():
             pygame.display.flip()
             table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
+                x = table.table_place_sprites.sprites()[-1].rect.x
+                y = table.table_place_sprites.sprites()[-1].rect.y
+                value = table_cards[-1][0]
+                suit = table_cards[-1][1]
+                table_card = Card(value, suit, (x, y))
+                table.all_sprites.add(table_card)
+                table.all_sprites.draw(table.screen)
                 break
