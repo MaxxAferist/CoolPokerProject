@@ -266,6 +266,9 @@ class Game():  # Игра
         self.logic.tern()
         self.logic.river()
 
+        self.counter = Counter(100, (WIDTH * 0.65, HEIGHT * 0.8, 120 * KOEF, 70 * KOEF))
+        self.all_sprites.add(self.counter)
+
         cards = self.logic.request_player_cards(self.player)
         table_cards = self.logic.request_table_cards()
 
@@ -552,7 +555,7 @@ class Poker_graphic():
                 break
 
     def bet(self, table, player, first_value, last_value):
-        slider = Slider(400, 500, 'vertical', 200, table)
+        slider = Slider(WIDTH * 0.75, HEIGHT * 0.88, 'vertical', 300 * KOEF, table)
         all_sprites = pygame.sprite.Group()
         all_sprites.add(slider)
         running = True
@@ -567,5 +570,6 @@ class Poker_graphic():
             all_sprites.update()
             all_sprites.draw(table.screen)
             pygame.display.flip()
-            table.screen.fill(pygame.Color(0, 0, 0))
+            table.screen.fill((0, 0, 0))
+            table.clock.tick(FPS)
         player.bid = round((last_value - first_value) * slider.value + first_value)

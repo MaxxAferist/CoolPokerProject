@@ -192,15 +192,24 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
         pos = pygame.mouse.get_pos()
         if self.click_flag and pressed:
             if self.type == 'gorizontal':
-                if pos[0] > self.line.rect.x + self.rect.w // 2 and \
-                    pos[0] < self.line.rect.x + self.line .rect.w - self.rect.w // 2:
+                if pos[0] > self.x0 + self.rect.w // 2 and \
+                    pos[0] < self.x0 + self.line.rect.w - self.rect.w // 2:
                     self.rect.centerx = pos[0]
-                    self.change_value()
             elif self.type == 'vertical':
-                if pos[1] >= self.line.rect.y + self.rect.h // 2 and \
-                        pos[1] <= self.line.rect.y + self.line.rect.h - self.rect.h // 2:
+                if pos[1] <= self.y0 + self.rect.h // 2 and \
+                        pos[1] >= self.y0 - self.line.rect.h + self.rect.h // 2:
                     self.rect.centery = pos[1]
-                    self.change_value()
+            if self.type == 'gorizontal':
+                if pos[0] < self.x0:
+                    self.rect.x = self.x0
+                elif pos[0] > self.x0 + self.line.rect.w:
+                    self.rect.x = self.x0 + self.line.rect.w
+            elif self.type == 'verticle':
+                if pos[1] < self.y0 + self.rect.h - self.line.rect.h:
+                    self.rect.y = self.y0 + self.rect.h - self.line.rect.h
+                elif pos[1] > self.y0 + self.rect.h // 2:
+                    self.rect.y = self.y0 + self.rect.h // 2
+            self.change_value()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
         else:
@@ -212,3 +221,19 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
         elif self.type == 'vertical':
             self.value = (self.y0 - self.rect.y) / (self.len - self.rect.h)
         self.value = round(self.value, 2)
+
+
+class Counter(pygame.sprite.Sprite):
+    def __init__(self, count, pos):
+        super().__init__()
+        self.x = pos[0]
+        self.y = pos[1]
+        self.image = pygame.Surface((pos[2], pos[3]), pygame.SRCALPHA)
+        self.ramka = pygame.draw.rect(self.image, (0, 0, 0), (0, 0, pos[2], pos[3]), 4)
+        self.count = count
+        self.font = pygame.font.Font(None, int(100 * KOEF))
+        self.text = self.font.render(str(self.count), True, (0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.image.blit(self.text, (0, 0))
