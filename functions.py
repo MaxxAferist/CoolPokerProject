@@ -192,15 +192,24 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
         pos = pygame.mouse.get_pos()
         if self.click_flag and pressed:
             if self.type == 'gorizontal':
-                if pos[0] > self.line.rect.x + self.rect.w // 2 and \
-                    pos[0] < self.line.rect.x + self.line .rect.w - self.rect.w // 2:
+                if pos[0] > self.x0 + self.rect.w // 2 and \
+                    pos[0] < self.x0 + self.line.rect.w - self.rect.w // 2:
                     self.rect.centerx = pos[0]
-                    self.change_value()
             elif self.type == 'vertical':
-                if pos[1] >= self.line.rect.y + self.rect.h // 2 and \
-                        pos[1] <= self.line.rect.y + self.line.rect.h - self.rect.h // 2:
+                if pos[1] <= self.y0 + self.rect.h // 2 and \
+                        pos[1] >= self.y0 - self.line.rect.h + self.rect.h // 2:
                     self.rect.centery = pos[1]
-                    self.change_value()
+            if self.type == 'gorizontal':
+                if pos[0] < self.x0:
+                    self.rect.x = self.x0
+                elif pos[0] > self.x0 + self.line.rect.w:
+                    self.rect.x = self.x0 + self.line.rect.w
+            elif self.type == 'verticle':
+                if pos[1] < self.y0 + self.rect.h - self.line.rect.h:
+                    self.rect.y = self.y0 + self.rect.h - self.line.rect.h
+                elif pos[1] > self.y0 + self.rect.h // 2:
+                    self.rect.y = self.y0 + self.rect.h // 2
+            self.change_value()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
         else:

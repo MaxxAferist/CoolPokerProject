@@ -571,5 +571,6 @@ class Poker_graphic():
             all_sprites.update()
             all_sprites.draw(table.screen)
             pygame.display.flip()
-            table.screen.fill(pygame.Color(0, 0, 0))
+            table.screen.fill((0, 0, 0))
+            table.clock.tick(FPS)
         player.bid = round((last_value - first_value) * slider.value + first_value)
