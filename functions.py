@@ -54,7 +54,7 @@ class Button(pygame.sprite.Sprite): #Класс кнопок
         self.pressed_flag = False
         self.action = action
 
-    def draw(self):
+    def update(self):
         pos = pygame.mouse.get_pos()
         pressed = pygame.mouse.get_pressed()[0]
         if self.rect.collidepoint(pos) and pressed:
@@ -175,16 +175,15 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
             self.line.image = line_image
             self.line.rect = line_image.get_rect()
         self.rect = self.image.get_rect()
-        self.rect.x = x + other.fon.rect.x
-        self.rect.y = y + other.fon.rect.y
+        self.rect.x = self.x0
+        self.rect.y = self.y0
         if self.type == 'gorizontal':
-            self.line.rect.x = self.rect.x
-            self.line.rect.y = (self.rect.h - self.line.rect.h) // 2 + self.rect.y
+            self.line.rect.x = self.x0
+            self.line.rect.y = (self.rect.h - self.line.rect.h) // 2 + self.y0
         elif self.type == 'vertical':
             self.line.rect.x = (self.rect.w - self.line.rect.w) // 2 + self.rect.x
-            self.line.rect.y = self.rect.y - (self.line.rect.h - self.rect.h)
+            self.line.rect.y = self.y0 - (self.line.rect.h - self.rect.h)
         self.click_flag = False
-        other.stack_sprites.add(self.line, self)
         self.value = 0
 
     def update(self):
@@ -203,12 +202,12 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
                 if pos[0] < self.x0:
                     self.rect.x = self.x0
                 elif pos[0] > self.x0 + self.line.rect.w:
-                    self.rect.x = self.x0 + self.line.rect.w
-            elif self.type == 'verticle':
-                if pos[1] < self.y0 + self.rect.h - self.line.rect.h:
-                    self.rect.y = self.y0 + self.rect.h - self.line.rect.h
-                elif pos[1] > self.y0 + self.rect.h // 2:
-                    self.rect.y = self.y0 + self.rect.h // 2
+                    self.rect.x = self.x0 + self.line.rect.w - self.rect.w
+            elif self.type == 'vertical':
+                if pos[1] < self.y0 - (self.line.rect.h - self.rect.h * 1.5):
+                    self.rect.y = self.y0 - self.line.rect.h + self.rect.h
+                elif pos[1] > self.y0 + self.rect.h:
+                    self.rect.y = self.y0
             self.change_value()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
@@ -228,12 +227,18 @@ class Counter(pygame.sprite.Sprite):
         super().__init__()
         self.x = pos[0]
         self.y = pos[1]
-        self.image = pygame.Surface((pos[2], pos[3]), pygame.SRCALPHA)
-        self.ramka = pygame.draw.rect(self.image, (0, 0, 0), (0, 0, pos[2], pos[3]), 4)
+        self.w = pos[2]
+        self.h = pos[3]
+        self.gererate_count(count)
+
+    def gererate_count(self, count):
+        self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
+        self.ramka = pygame.draw.rect(self.image, (0, 0, 0), (0, 0, self.w, self.h), 4)
         self.count = count
         self.font = pygame.font.Font(None, int(100 * KOEF))
         self.text = self.font.render(str(self.count), True, (0, 0, 0))
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
-        self.image.blit(self.text, (0, 0))
+        self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
+                                    (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))

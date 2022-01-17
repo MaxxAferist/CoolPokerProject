@@ -50,10 +50,12 @@ class Menu():
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
         self.all_sprites = pygame.sprite.Group()
+        self.fon_sprite = pygame.sprite.Group()
         self.button_sprites = pygame.sprite.Group()
         fon_image = pygame.image.load('data//Poker_menu_2.png')
         self.fon = Beautiful_Fon(fon_image)
         self.all_sprites.add(self.fon)
+        self.fon_sprite.add(self.fon)
         buttons_width = 400
         buttons_height = buttons_width * 0.37
         promezh = 5
@@ -73,8 +75,7 @@ class Menu():
         self.running = True
         while self.running:
             for event in pygame.event.get():
-                for btn in self.buttons:
-                    btn.draw()
+                self.button_sprites.update()
             self.all_sprites.draw(self.screen)
             self.all_sprites.update()
             pygame.display.flip()

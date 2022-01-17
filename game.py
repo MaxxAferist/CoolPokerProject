@@ -3,6 +3,7 @@ import pygame
 from functions import *
 from mini_menu import *
 
+
 pygame.init()
 
 
@@ -18,13 +19,6 @@ class Poker_player():  # Класс игрока покера
     def call(self, table):  # Ставка, равная наибольшей ставке на столе
         self.bid += max(list(map(lambda x: x.bid, table.players))) - self.bid
         self.move = False
-        print(self.bid)
-
-    def can_call(self, table):
-        bid = max(list(map(lambda x: x.bid, table.players)))
-        if self.money < bid:
-            return False
-        return True
 
     def reise(self, bid):  # Ставка, большая чем самая большая
         self.bid += bid
@@ -40,10 +34,6 @@ class Poker_player():  # Класс игрока покера
         self.move = False
 
     def check(self):  # Пропуск ставки
-        self.move = False
-
-    def bet(self, bid):
-        self.bid += bid
         self.move = False
 
     def little_blind(self):
@@ -76,6 +66,7 @@ class Poker_Logic():  # Логика покера
     def preflop(self):  # Выдача карт игрокам
         for player in self.players:
             self.bank += player.bid
+            player.money -= player.bid
             player.bid = 0
             player.cards = [self.deck.pop(), self.deck.pop()]
 
@@ -117,8 +108,6 @@ class Poker_Logic():  # Логика покера
             cards.append((i.value, i.suit))
         your_cards = [(player.cards[0].value, player.cards[0].suit),
                       (player.cards[1].value, player.cards[1].suit)]
-        #your_cards = [('Q', 'bubn'), ('K', 'pik')]
-        #cards = [('2', 'krest'), ('A', 'cherv'), ('K', 'bubn'), ('10', 'pik'), ('J', 'cherv')]
         all_values = [i[0] for i in your_cards + cards]
         all_suits = [i[1] for i in your_cards + cards]
         card_suits = [i[1] for i in cards]
@@ -144,7 +133,6 @@ class Poker_Logic():  # Логика покера
         for i in card_val:
             if i not in no_rep_card:
                 no_rep_card.append(i)
-        print(cards, your_cards, sep='\n')
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
 
         # Флеш рояль(Энергетик от суперсел)
@@ -220,7 +208,6 @@ class Game():  # Игра
         self.player_place_sprites = pygame.sprite.Group()
         self.table_place_sprites = pygame.sprite.Group()
         self.bot_place_sprites = pygame.sprite.Group()
-        self.stack_sprites = pygame.sprite.Group()
         self.button_sprites = pygame.sprite.Group()
 
         self.fon = pygame.sprite.Sprite(self.all_sprites)
@@ -236,6 +223,13 @@ class Game():  # Игра
         self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * KOEF),
                                                                   int(koloda_image.get_height() * KOEF)))
 
+        self.graph = Poker_graphic()
+        self.logic = Poker_Logic()
+        self.bot = Poker_player(1000, 'bot')
+        self.player = Poker_player(1000, 'player')
+        self.players = [self.bot, self.player]
+        self.logic.players = [self.bot, self.player]
+
         buttons_width = 300
         buttons_height = 60
         font_size = 50
@@ -250,57 +244,32 @@ class Game():  # Игра
                                (buttons_width, buttons_height), font_size, termit),
                         Button('Колл', (WIDTH * 0.8, HEIGHT * 0.75 - 155 * KOEF),
                                (buttons_width, buttons_height), font_size, lambda: self.player.call(self))]
-        self.all_sprites.add(self.buttons)
+
         self.button_sprites.add(self.buttons)
         self.add_sprites()
-
-        self.graph = Poker_graphic()
-        self.logic = Poker_Logic()
-        self.bot = Poker_player(1000, 'bot')
-        self.player = Poker_player(1000, 'player')
-        self.players = [self.bot, self.player]
-        self.logic.players = [self.bot, self.player]
-
-        self.logic.preflop()
-        self.logic.flop()
-        self.logic.tern()
-        self.logic.river()
-
-        self.counter = Counter(100, (WIDTH * 0.65, HEIGHT * 0.8, 120 * KOEF, 70 * KOEF))
-        self.all_sprites.add(self.counter)
-
-        cards = self.logic.request_player_cards(self.player)
-        table_cards = self.logic.request_table_cards()
-
-        self.graph.preflop(self, cards)
-        self.graph.flop(self, table_cards)
-        self.graph.tern(self, table_cards)
-        self.graph.river(self, table_cards)
-        print(self.logic.check(self.player))
         self.go_menu = go_menu
 
     def run(self):
-        self.running = True
-        while self.running:
-            self.stack_sprites = pygame.sprite.Group()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                    self.running = False
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
-                    self.start_mini_menu()
-            for btn in self.buttons:
-                btn.draw()
-            self.all_sprites.draw(self.screen)
-            pygame.display.flip()
-            self.screen.fill(pygame.Color('black'))
-            self.clock.tick(FPS)
+        while True:
             self.random_blind()
             self.little_blind()
             self.big_blind()
-            while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))):
-                self.stack_sprites = pygame.sprite.Group()
+            while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
+                    max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
             self.preflop()
+            while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
+                    max(list(map(lambda x: x.bid, self.players))) == 0:
+                self.bet()
+            self.flop()
+            while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
+                    max(list(map(lambda x: x.bid, self.players))) == 0:
+                self.bet()
+            self.tern()
+            while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
+                    max(list(map(lambda x: x.bid, self.players))) == 0:
+                self.bet()
+            self.river()
 
     def random_blind(self):
         random.choice(self.players).move = True
@@ -313,7 +282,6 @@ class Game():  # Игра
                     self.players[i + 1].move = True
                 else:
                     self.players[0].move = True
-                print(self.players[i].bid)
                 break
 
     def big_blind(self):
@@ -324,12 +292,24 @@ class Game():  # Игра
                     self.players[i + 1].move = True
                 else:
                     self.players[0].move = True
-                print(self.players[i].bid)
                 break
 
     def preflop(self):
         self.logic.preflop()
-        self.graph.preflop(self)
+        player = list(filter(lambda x: x.player_type == 'player', self.players))[0]
+        self.graph.preflop(self, player.cards)
+
+    def flop(self):
+        self.logic.flop()
+        self.graph.flop(self, self.logic.table_cards)
+
+    def tern(self):
+        self.logic.tern()
+        self.graph.tern(self, self.logic.table_cards)
+
+    def river(self):
+        self.logic.river()
+        self.graph.river(self, self.logic.table_cards)
 
     def bet(self):
         for i in range(len(self.players)):
@@ -347,7 +327,6 @@ class Game():  # Игра
                         self.players[i + 1].move = True
                     else:
                         self.players[0].move = True
-                print(self.players[i].bid)
                 break
 
     def add_sprites(self):  # Все спрайты на столе
@@ -433,8 +412,6 @@ class Poker_graphic():
                     table.go_menu()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
                     table.start_mini_menu()
-            for btn in table.buttons:
-                btn.draw()
             table.all_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
@@ -444,8 +421,8 @@ class Poker_graphic():
                 for i in range(2):
                     x = table.player_place_sprites.sprites()[i].rect.x
                     y = table.player_place_sprites.sprites()[i].rect.y
-                    value = player_cards[i][0]
-                    suit = player_cards[i][1]
+                    value = player_cards[i].value
+                    suit = player_cards[i].suit
                     player_card = Card(value, suit, (x, y))
                     table.all_sprites.add(player_card)
                     table.all_sprites.draw(table.screen)
@@ -468,8 +445,6 @@ class Poker_graphic():
                     table.go_menu()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
                     table.start_mini_menu()
-            for btn in table.buttons:
-                btn.draw()
             table.all_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
@@ -479,8 +454,8 @@ class Poker_graphic():
                 for i in range(3):
                     x = table.table_place_sprites.sprites()[i].rect.x
                     y = table.table_place_sprites.sprites()[i].rect.y
-                    value = table_cards[i][0]
-                    suit = table_cards[i][1]
+                    value = table_cards[i].value
+                    suit = table_cards[i].suit
                     table_card = Card(value, suit, (x, y))
                     table.all_sprites.add(table_card)
                     table.all_sprites.draw(table.screen)
@@ -502,8 +477,6 @@ class Poker_graphic():
                     table.go_menu()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
                     table.start_mini_menu()
-            for btn in table.buttons:
-                btn.draw()
             table.all_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
@@ -512,8 +485,8 @@ class Poker_graphic():
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
                 x = table.table_place_sprites.sprites()[-2].rect.x
                 y = table.table_place_sprites.sprites()[-2].rect.y
-                value = table_cards[-2][0]
-                suit = table_cards[-2][1]
+                value = table_cards[-2].value
+                suit = table_cards[-2].suit
                 table_card = Card(value, suit, (x, y))
                 table.all_sprites.add(table_card)
                 table.all_sprites.draw(table.screen)
@@ -535,41 +508,59 @@ class Poker_graphic():
                     table.go_menu()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
                     table.start_mini_menu()
-            for btn in table.buttons:
-                btn.draw()
             table.all_sprites.draw(table.screen)
-            for btn in table.buttons:
-                btn.draw()
-            cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
             table.screen.fill(pygame.Color(0, 0, 0))
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
                 x = table.table_place_sprites.sprites()[-1].rect.x
                 y = table.table_place_sprites.sprites()[-1].rect.y
-                value = table_cards[-1][0]
-                suit = table_cards[-1][1]
+                value = table_cards[-1].value
+                suit = table_cards[-1].suit
                 table_card = Card(value, suit, (x, y))
                 table.all_sprites.add(table_card)
                 table.all_sprites.draw(table.screen)
                 break
 
     def bet(self, table, player, first_value, last_value):
-        slider = Slider(WIDTH * 0.75, HEIGHT * 0.88, 'vertical', 300 * KOEF, table)
-        all_sprites = pygame.sprite.Group()
-        all_sprites.add(slider)
-        running = True
-        while running:
+        table.buttons[3].action = lambda: self.reise(table, player, first_value, last_value)
+        self.go_bid = True
+        while self.go_bid:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_0:
                     running = False
-            for btn in table.buttons:
-                btn.draw()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                    table.start_mini_menu()
             table.all_sprites.draw(table.screen)
-            table.stack_sprites.draw(table.screen)
+            table.button_sprites.update()
+            table.button_sprites.draw(table.screen)
+            pygame.display.flip()
+            table.screen.fill((0, 0, 0))
+            table.clock.tick(FPS)
+
+    def reise(self, table, player, first_value, last_value):
+        slider = Slider(WIDTH * 0.75, HEIGHT * 0.88, 'vertical', 300 * KOEF, table)
+        all_sprites = pygame.sprite.Group()
+        all_sprites.add(slider.line, slider)
+        counter = Counter(first_value, (WIDTH * 0.61, HEIGHT * 0.8, 250 * KOEF, 70 * KOEF))
+        all_sprites.add(counter)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    running = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
+                    table.start_mini_menu()
+            table.all_sprites.draw(table.screen)
+            table.button_sprites.update()
+            table.button_sprites.draw(table.screen)
             all_sprites.update()
             all_sprites.draw(table.screen)
             pygame.display.flip()
             table.screen.fill((0, 0, 0))
             table.clock.tick(FPS)
-        player.bid = round((last_value - first_value) * slider.value + first_value)
+
+            count = round((last_value - first_value) * slider.value + first_value)
+            counter.gererate_count(count)
+        player.bid += round((last_value - first_value) * slider.value + first_value)
+        self.go_bid = False

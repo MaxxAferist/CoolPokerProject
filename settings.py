@@ -29,6 +29,7 @@ class Settings():
         self.sound_slider = Slider((self.fon.rect.w - self.music.get_rect()[2]) // 2 - 100 * KOEF,
                                    (self.fon.rect.h - self.music.get_rect()[3]) * 0.72,
                                    'gorizontal', 300 * KOEF, self)
+        self.all_sprites.add(self.music_slider.line, self.music_slider, self.sound_slider.line, self.sound_slider)
         self.clock = pygame.time.Clock()
         self.running = True
 
@@ -37,8 +38,11 @@ class Settings():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if not self.fon.rect.collidepoint(event.pos):
+                        self.running = False
             other.all_sprites.draw(other.screen)
-            other.all_sprites.update()
+            other.fon_sprite.update()
             self.all_sprites.draw(other.screen)
             self.all_sprites.update()
             self.stack_sprites.draw(other.screen)
