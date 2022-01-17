@@ -117,8 +117,8 @@ class Poker_Logic():  # Логика покера
             cards.append((i.value, i.suit))
         your_cards = [(player.cards[0].value, player.cards[0].suit),
                       (player.cards[1].value, player.cards[1].suit)]
-        #your_cards = [('A', 'pik'), ('K', 'pik')]
-        #cards = [('Q', 'pik'), ('J', 'pik'), ('10', 'pik'), ('9', 'pik'), ('8', 'pik')]
+        #your_cards = [('6', 'bubn'), ('7', 'pik')]
+        #cards = [('Q', 'pik'), ('6', 'pik'), ('6', 'bubn'), ('K', 'bubn'), ('K', 'bubn')]
         all_values = [i[0] for i in your_cards + cards]
         all_suits = [i[1] for i in your_cards + cards]
         card_suits = [i[1] for i in cards]
@@ -146,7 +146,6 @@ class Poker_Logic():  # Логика покера
                 no_rep_card.append(i)
         print(cards, your_cards, sep='\n')
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
-        print(lst_straight)
 
         # Флеш рояль(Энергетик от суперсел)
         if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
@@ -162,11 +161,8 @@ class Poker_Logic():  # Логика покера
         if self.intersection(all_values, card_val, 4) == 1:
             your_combunations.append(combinations[2])
         # Фулхаус
-        if self.intersection(all_values, card_val, 3) == 1 and self.intersection(all_values, card_val, 2) == 1:
-            your_combunations.append(combinations[3])
-            return your_combunations
         # Флеш(энергетик)
-        if (len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2:
+        if max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3:
             your_combunations.append(combinations[4])
         # Стрит(улица)
         if len(lst_straight) == 5:
@@ -183,7 +179,10 @@ class Poker_Logic():  # Логика покера
             your_combunations.append(combinations[8])
         # Старшая карта
         your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
-
+        if 'pair' in your_combunations and 'three of kind' in your_combunations:
+            your_combunations.remove('pair')
+            your_combunations.remove('three of kind')
+            your_combunations.insert(0, 'full house')
         return your_combunations
 
     def intersection(self, all_cards, table_cards, count):
