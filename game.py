@@ -117,8 +117,8 @@ class Poker_Logic():  # Логика покера
             cards.append((i.value, i.suit))
         your_cards = [(player.cards[0].value, player.cards[0].suit),
                       (player.cards[1].value, player.cards[1].suit)]
-        #your_cards = [('6', 'bubn'), ('7', 'pik')]
-        #cards = [('Q', 'pik'), ('6', 'pik'), ('6', 'bubn'), ('K', 'bubn'), ('K', 'bubn')]
+        #your_cards = [('Q', 'bubn'), ('K', 'pik')]
+        #cards = [('2', 'krest'), ('A', 'cherv'), ('K', 'bubn'), ('10', 'pik'), ('J', 'cherv')]
         all_values = [i[0] for i in your_cards + cards]
         all_suits = [i[1] for i in your_cards + cards]
         card_suits = [i[1] for i in cards]
@@ -151,12 +151,10 @@ class Poker_Logic():  # Логика покера
         if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
                 (len(lst_straight) == 5 and lst_straight[0] == '10'):
             your_combunations.append(combinations[0])
-            return your_combunations
         # Стрит флеш
         if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
                 (len(lst_straight) == 5):
             your_combunations.append(combinations[1])
-            return your_combunations
         # Каре(как у девочек дед инсайдих)
         if self.intersection(all_values, card_val, 4) == 1:
             your_combunations.append(combinations[2])
@@ -167,7 +165,6 @@ class Poker_Logic():  # Логика покера
         # Стрит(улица)
         if len(lst_straight) == 5:
             your_combunations.append(combinations[5])
-            return your_combunations
         # Сет(тройка)
         if self.intersection(all_values, card_val, 3) == 1:
             your_combunations.append(combinations[6])
