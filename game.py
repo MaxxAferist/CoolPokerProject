@@ -117,8 +117,8 @@ class Poker_Logic():  # Логика покера
             cards.append((i.value, i.suit))
         your_cards = [(player.cards[0].value, player.cards[0].suit),
                       (player.cards[1].value, player.cards[1].suit)]
-        your_cards = [('3', 'pik'), ('4', 'pik')]
-        cards = [('5', 'pik'), ('6', 'pik'), ('7', 'pik'), ('9', 'pik'), ('8', 'pik')]
+        #your_cards = [('A', 'pik'), ('K', 'pik')]
+        #cards = [('Q', 'pik'), ('J', 'pik'), ('10', 'pik'), ('9', 'pik'), ('8', 'pik')]
         all_values = [i[0] for i in your_cards + cards]
         all_suits = [i[1] for i in your_cards + cards]
         card_suits = [i[1] for i in cards]
@@ -148,7 +148,7 @@ class Poker_Logic():  # Логика покера
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
         print(lst_straight)
 
-        # Флеш рояль
+        # Флеш рояль(Энергетик от суперсел)
         if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
                 (len(lst_straight) == 5 and lst_straight[0] == '10'):
             your_combunations.append(combinations[0])
@@ -293,7 +293,7 @@ class Game():  # Игра
                 btn.draw()
             self.all_sprites.draw(self.screen)
             pygame.display.flip()
-            self.screen.fill(pygame.Color(0, 0, 0))
+            self.screen.fill(pygame.Color('black'))
             self.clock.tick(FPS)
             self.random_blind()
             self.little_blind()
@@ -381,7 +381,7 @@ class Game():  # Игра
             self.bot_place_sprites.add(place)
 
         robot = pygame.sprite.Sprite(self.all_sprites)
-        robot.image = pygame.transform.scale(self.robot_image, (int(w_card_k * 0.75), (h_card_k * 0.75)))
+        robot.image = pygame.transform.scale(self.robot_image, (int(w_card_k * 0.75), int(h_card_k * 0.75)))
         robot.rect = self.robot_image.get_rect()
 
         up_top = int((HEIGHT - h_card) * 0.07)

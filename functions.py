@@ -29,7 +29,7 @@ def transform_image(image): #Трансформация картинки
     w = rect.w
     h = rect.h
     koef = WIDTH / 1920
-    image = pygame.transform.scale(image, (int(w * koef), (h * koef)))
+    image = pygame.transform.scale(image, (int(w * koef), int(h * koef)))
     return image
 
 
@@ -45,7 +45,7 @@ class Button(pygame.sprite.Sprite): #Класс кнопок
         f = pygame.font.Font(None, int(self.font_size))
         self.text = f.render(self.name, True,
                              (0, 0, 0))
-        self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
+        self.image = pygame.transform.scale(Button.image, (int(self.w * KOEF), int(self.h * KOEF)))
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
@@ -59,7 +59,7 @@ class Button(pygame.sprite.Sprite): #Класс кнопок
         pressed = pygame.mouse.get_pressed()[0]
         if self.rect.collidepoint(pos) and pressed:
             f = pygame.font.Font(None, int(self.font_size))
-            self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
+            self.image = pygame.transform.scale(Button.image, (int(self.w * KOEF), int(self.h * KOEF)))
             self.text = f.render(self.name, True,
                                  (255, 255, 0))
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
@@ -71,14 +71,14 @@ class Button(pygame.sprite.Sprite): #Класс кнопок
         elif self.rect.collidepoint(pos):
             self.click_flag = True
             f = pygame.font.Font(None, int(self.font_size))
-            self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
+            self.image = pygame.transform.scale(Button.image, (int(self.w * KOEF), int(self.h * KOEF)))
             self.text = f.render(self.name, True,
                                  (0, 162, 232))
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
         else:
             self.pressed_flag = False
             f = pygame.font.Font(None, int(self.font_size))
-            self.image = pygame.transform.scale(Button.image, (self.w * KOEF, self.h * KOEF))
+            self.image = pygame.transform.scale(Button.image, (int(self.w * KOEF), int(self.h * KOEF)))
             self.text = f.render(self.name, True,
                                  (255, 255, 255))
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
@@ -111,7 +111,7 @@ class Cards_back(pygame.sprite.Sprite): #Рубашка карт
         self.motion = False
         self.k = None
         self.b = None
-        self.v = 20
+        self.v = round(40 * KOEF)
         self.final_coords = [0, 0]
 
     def update(self):
@@ -147,7 +147,7 @@ class Place_from_card(pygame.sprite.Sprite): #Место для карты
     def resize(self, k):
         x = self.rect.x
         y = self.rect.y
-        self.image = pygame.transform.scale(Place_from_card.image, (self.rect.w * k, self.rect.h * k))
+        self.image = pygame.transform.scale(Place_from_card.image, (int(self.rect.w * k), (self.rect.h * k)))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -163,13 +163,13 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
         self.x0 = x + other.fon.rect.x
         self.y0 = y + other.fon.rect.y
         if self.type == 'vertical':
-            self.image = pygame.transform.rotate(pygame.transform.scale(Slider.image, (20, 50)), 90)
+            self.image = pygame.transform.rotate(pygame.transform.scale(Slider.image, (int(20 * KOEF), int(50 * KOEF))), 90)
             line_image = pygame.Surface((self.line_width, self.len))
             self.line = pygame.sprite.Sprite()
             self.line.image = line_image
             self.line.rect = line_image.get_rect()
         elif self.type == 'gorizontal':
-            self.image = pygame.transform.scale(Slider.image, (20 * KOEF, 50 * KOEF))
+            self.image = pygame.transform.scale(Slider.image, (int(20 * KOEF), int(50 * KOEF)))
             line_image = pygame.Surface((self.len, self.line_width))
             self.line = pygame.sprite.Sprite()
             self.line.image = line_image
