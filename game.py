@@ -137,49 +137,91 @@ class Poker_Logic():  # Логика покера
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
 
         # Флеш рояль(Энергетик от суперсел)
-        if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
+        if (
+                (len(set(card_suits)) != 1 and (max([all_suits.count(i) for i in all_suits]) >= 5) or len(
+                    set(all_suits)) <= 3)) and \
                 (len(lst_straight) == 5 and lst_straight[0] == '10'):
-            your_combunations.append(combinations[0])
+            your_combunations.append((combinations[0], 10))
         # Стрит флеш
-        if ((len(set(card_suits)) != 1 and max([all_suits.count(i) for i in all_suits]) >= 5) or len(set(all_suits)) <= 2) and \
+        if (
+                (len(set(card_suits)) != 1 and (max([all_suits.count(i) for i in all_suits]) >= 5) or len(
+                    set(all_suits)) <= 3)) and \
                 (len(lst_straight) == 5):
-            your_combunations.append(combinations[1])
+            your_combunations.append((combinations[5], lst_straight))
+        kare = self.intersection(all_values, card_val, 4)
         # Каре(как у девочек дед инсайдих)
-        if self.intersection(all_values, card_val, 4) == 1:
-            your_combunations.append(combinations[2])
-        # Фулхаус
+        if len(kare) == 1:
+            your_combunations.append((combinations[8], kare))
         # Флеш(энергетик)
         if max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3:
-            your_combunations.append(combinations[4])
+            your_combunations.append((combinations[3], 7))
         # Стрит(улица)
         if len(lst_straight) == 5:
-            your_combunations.append(combinations[5])
+            your_combunations.append((combinations[5], lst_straight))
+        three_of_kind = self.intersection(all_values, card_val, 3)
         # Сет(тройка)
-        if self.intersection(all_values, card_val, 3) == 1:
-            your_combunations.append(combinations[6])
+        if len(three_of_kind) == 1:
+            your_combunations.append((combinations[6], three_of_kind))
+        pairs = self.intersection(all_values, card_val, 2)
         # 2 пары
-        if self.intersection(all_values, card_val, 2) == 2:
-            your_combunations.append(combinations[7])
+        if len(pairs) == 2:
+            your_combunations.append((combinations[7], pairs))
         # Пара
-        if self.intersection(all_values, card_val, 2) == 1:
-            your_combunations.append(combinations[8])
+        if len(pairs) == 1:
+            your_combunations.append((combinations[8], pairs))
         # Старшая карта
         your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
+        # Фулхаус
         if 'pair' in your_combunations and 'three of kind' in your_combunations:
             your_combunations.remove('pair')
             your_combunations.remove('three of kind')
             your_combunations.insert(0, 'full house')
-        return your_combunations
+        print(cards, your_cards)
+        print(your_combunations)
+        return [i for i in your_combunations if your_combunations.count(i) == 1]
 
     def intersection(self, all_cards, table_cards, count):
         all_cards = set([i for i in all_cards if all_cards.count(i) >= count])
         table_cards = set([i for i in table_cards if table_cards.count(i) >= count])
         if len(all_cards) > len(table_cards):
-            return len(all_cards) - len(table_cards)
-        return 0
+            lst = all_cards - table_cards
+            return list(lst)
+        return []
 
     def define_winner(self, table):
-        pass
+        player_count = self.counter(self.check(self.players[1]))
+        bot_count = self.counter(self.check(self.players[0]))
+        if player_count < bot_count:
+            return 'bot'
+        elif player_count > bot_count:
+            return 'player'
+        else:
+            return 'draw'
+
+    def counter(self, combunations):
+        values = ['2', '3', '4', '5', '6', '7', '8', '9',
+                  '10', 'J', 'Q', 'K', 'A']
+        count = 0
+        for i in combunations:
+            if i[0] == 'royal flush':
+                count += 1000
+            if i[0] == 'straight flush':
+                count += 900 + values.index(i[1][-1]) + 1
+            if i[0] == 'four of kind':
+                count += 800 + values.index(i[1][0]) + 1
+            if i[0] == 'flush':
+                count += 600
+            if i[0] == 'straight':
+                count += 500 + values.index(i[1][-1]) + 1
+            if i[0] == 'three of kind':
+                count += 400 + values.index(i[1][0]) + 1
+            if i[0] == 'two pair':
+                count += 300 + values.index(i[1][0]) + 1 + values.index(i[1][1]) + 1
+            if i[0] == 'pair':
+                count += 200 + values.index(i[1][0]) + 1
+            if i[0] == 'high card':
+                count += 100 + values.index(i[1]) + 1
+        return count
 
     def straight_check(self, all_cards, table_cards, values):
         for i in range(len(all_cards), 0, -1):
