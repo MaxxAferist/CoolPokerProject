@@ -1,8 +1,11 @@
+import pygame
+
 from game import *
 from settings import Settings
 
 
 pygame.init()
+pygame.mixer.init()
 
 
 def go_menu():
@@ -72,6 +75,8 @@ class Menu():
         self.button_sprites.add(self.buttons)
 
     def run(self):
+        pygame.mixer.music.load('data//music//M. Shubin - Drive (demo).mp3')
+        pygame.mixer.music.play()
         self.running = True
         while self.running:
             for event in pygame.event.get():

@@ -3,11 +3,14 @@ import pygame
 import sys
 import os
 import random
+import time
 
 WIDTH = windll.user32.GetSystemMetrics(0)
 HEIGHT = windll.user32.GetSystemMetrics(1)
 FPS = 60
 KOEF = WIDTH / 1920
+pygame.mixer.init()
+SOUNDS = [pygame.mixer.Sound('data//sounds//Click.mp3')]
 
 
 def load_image(name): #Загрузка картинки
@@ -20,6 +23,7 @@ def load_image(name): #Загрузка картинки
 
 
 def termit(): #Выход
+    pygame.mixer.stop()
     pygame.quit()
     sys.exit()
 
@@ -53,6 +57,7 @@ class Button(pygame.sprite.Sprite): #Класс кнопок
         self.click_flag = False
         self.pressed_flag = False
         self.action = action
+        self.sound = SOUNDS[0]
 
     def update(self):
         pos = pygame.mouse.get_pos()
@@ -66,6 +71,7 @@ class Button(pygame.sprite.Sprite): #Класс кнопок
             self.pressed_flag = True
         elif self.rect.collidepoint(pos) and self.pressed_flag and not pressed:
             if self.click_flag and self.action:
+                self.sound.play()
                 self.pressed_flag = False
                 self.action()
         elif self.rect.collidepoint(pos):
@@ -155,7 +161,7 @@ class Place_from_card(pygame.sprite.Sprite): #Место для карты
 
 class Slider(pygame.sprite.Sprite): #Класс слайдеров
     image = load_image('buttons//slider.png')
-    def __init__(self, x, y, type, len, other):
+    def __init__(self, x, y, type, len, other, value=0):
         super().__init__()
         self.len = len
         self.type = type
@@ -180,11 +186,14 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
         if self.type == 'gorizontal':
             self.line.rect.x = self.x0
             self.line.rect.y = (self.rect.h - self.line.rect.h) // 2 + self.y0
+            self.rect.x = self.x0 + (self.line.rect.w - self.rect.w) * value
         elif self.type == 'vertical':
             self.line.rect.x = (self.rect.w - self.line.rect.w) // 2 + self.rect.x
             self.line.rect.y = self.y0 - (self.line.rect.h - self.rect.h)
+            self.rect.y = self.y0 - (self.line.rect.h - self.rect.h) * value
         self.click_flag = False
-        self.value = 0
+        self.value = value
+
 
     def update(self):
         pressed = pygame.mouse.get_pressed()[0]
@@ -223,19 +232,20 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
 
 
 class Counter(pygame.sprite.Sprite):
-    def __init__(self, count, pos):
+    def __init__(self, count, pos, font_size):
         super().__init__()
         self.x = pos[0]
         self.y = pos[1]
         self.w = pos[2]
         self.h = pos[3]
+        self.font_size = font_size
         self.gererate_count(count)
 
     def gererate_count(self, count):
         self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
         self.ramka = pygame.draw.rect(self.image, (0, 0, 0), (0, 0, self.w, self.h), 4)
         self.count = count
-        self.font = pygame.font.Font(None, int(100 * KOEF))
+        self.font = pygame.font.Font(None, int(self.font_size))
         self.text = self.font.render(str(self.count), True, (0, 0, 0))
         self.rect = self.image.get_rect()
         self.rect.x = self.x

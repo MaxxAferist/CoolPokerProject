@@ -1,12 +1,14 @@
 from functions import *
+from settings import Settings
 import pygame
 
 
-pygame.init()
-
+def go_settings(other):
+    run_settings = Settings()
+    run_settings.run(other)
 
 class Mini_menu():
-    def __init__(self):
+    def __init__(self, other):
         self.all_sprites = pygame.sprite.Group()
         self.btn_sprites = pygame.sprite.Group()
         self.fon = pygame.sprite.Sprite(self.all_sprites)
@@ -15,7 +17,22 @@ class Mini_menu():
         self.fon.image = fon_image
         self.fon.rect = self.fon.image.get_rect()
         self.clock = pygame.time.Clock()
+        self.add_buttons(other)
         self.running = True
+
+    def add_buttons(self, other):
+        left_top = 30 * KOEF
+        up_top = 20 * KOEF
+        w_btn = (self.fon.rect.w - left_top * 2) / KOEF
+        h_btn = w_btn * 0.37
+        self.buttons = [Button('Продолжить', (left_top, up_top), (w_btn, h_btn), 43, self.close),
+                        Button('Сохранить игру', (left_top, h_btn), (w_btn, h_btn), 43, self.close),
+                        Button('Настройки', (left_top, h_btn * 2), (w_btn, h_btn), 43, lambda: go_settings(other)),
+                        Button('Выйти', (left_top, h_btn * 3), (w_btn, h_btn), 43, other.go_menu)]
+        self.btn_sprites.add(self.buttons)
+
+    def close(self):
+        self.running = False
 
     def run(self, other):
         while self.running:
@@ -26,7 +43,9 @@ class Mini_menu():
                     if not self.fon.rect.collidepoint(event.pos):
                         self.running = False
                 self.all_sprites.update()
+                self.btn_sprites.update()
             other.all_sprites.draw(other.screen)
             self.all_sprites.draw(other.screen)
+            self.btn_sprites.draw(other.screen)
             pygame.display.flip()
             self.clock.tick(FPS)
