@@ -329,4 +329,3 @@ class Win_particle(pygame.sprite.Sprite):
         self.rect.y += self.velocity[1]
         if not self.rect.colliderect((0, 0, 100, 100)):
             self.kill()
-
