@@ -19,10 +19,12 @@ class Poker_player():  # Класс игрока покера
     def call(self, table):  # Ставка, равная наибольшей ставке на столе
         self.bid += max(list(map(lambda x: x.bid, table.players))) - self.bid
         self.move = False
+        self.money -= max(list(map(lambda x: x.bid, table.players))) - self.bid
 
     def reise(self, bid):  # Ставка, большая чем самая большая
         self.bid += bid
         self.move = False
+        self.money -= bid
 
     def fold(self):  # Пас
         self.play = False
@@ -30,8 +32,9 @@ class Poker_player():  # Класс игрока покера
         self.move = False
 
     def va_bank(self):  # Ва-банк
-        self.bid = self.money
+        self.bid += self.money
         self.move = False
+        self.money = 0
 
     def check(self):  # Пропуск ставки
         self.move = False
@@ -39,10 +42,12 @@ class Poker_player():  # Класс игрока покера
     def little_blind(self):
         self.bid = 25
         self.move = False
+        self.money -= 25
 
     def big_blind(self):
         self.bid = 50
         self.move = False
+        self.money -= 50
 
 
 class Poker_Logic():  # Логика покера
@@ -177,6 +182,9 @@ class Poker_Logic():  # Логика покера
             return len(all_cards) - len(table_cards)
         return 0
 
+    def define_winner(self, table):
+        pass
+
     def straight_check(self, all_cards, table_cards, values):
         for i in range(len(all_cards), 0, -1):
             if ''.join(all_cards[i - 5:i]) in ''.join(values):
@@ -250,26 +258,33 @@ class Game():  # Игра
         self.go_menu = go_menu
 
     def run(self):
-        while True:
+        while self.player.money > 0:
             self.random_blind()
             self.little_blind()
+            self.money_count.gererate_count(self.player.money)
             self.big_blind()
+            self.money_count.gererate_count(self.player.money)
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
+                self.money_count.gererate_count(self.player.money)
             self.preflop()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
+                self.money_count.gererate_count(self.player.money)
             self.flop()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
+                self.money_count.gererate_count(self.player.money)
             self.tern()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
+                self.money_count.gererate_count(self.player.money)
             self.river()
+            self.who_win()
 
     def random_blind(self):
         random.choice(self.players).move = True
@@ -329,6 +344,9 @@ class Game():  # Игра
                         self.players[0].move = True
                 break
 
+    def who_win(self):
+        winner = self.logic.define_winner(self)
+
     def add_sprites(self):  # Все спрайты на столе
         w_card = Place_from_card.image.get_width()
         h_card = Place_from_card.image.get_height()
@@ -375,6 +393,9 @@ class Game():  # Игра
         left_top = (WIDTH - self.koloda.rect.w) * 0.05
         self.koloda.rect.x = left_top
         self.koloda.rect.y = up_top
+
+        self.money_count = Counter(self.player.money, (WIDTH * 0.434, HEIGHT * 0.9, 250 * KOEF, 70 * KOEF))
+        self.all_sprites.add(self.money_count)
 
     def start_mini_menu(self):
         self.mini_menu = Mini_menu()
@@ -527,8 +548,6 @@ class Poker_graphic():
         self.go_bid = True
         while self.go_bid:
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_0:
-                    running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_j:
                     table.start_mini_menu()
             table.all_sprites.draw(table.screen)
@@ -562,5 +581,5 @@ class Poker_graphic():
 
             count = round((last_value - first_value) * slider.value + first_value)
             counter.gererate_count(count)
-        player.bid += round((last_value - first_value) * slider.value + first_value)
+        player.reise(round((last_value - first_value) * slider.value + first_value))
         self.go_bid = False
