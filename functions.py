@@ -201,7 +201,7 @@ class Slider(pygame.sprite.Sprite): #Класс слайдеров
         if self.click_flag and pressed:
             if self.type == 'gorizontal':
                 if pos[0] > self.x0 + self.rect.w // 2 and \
-                    pos[0] < self.x0 + self.line.rect.w - self.rect.w // 2:
+                        pos[0] < self.x0 + self.line.rect.w - self.rect.w // 2:
                     self.rect.centerx = pos[0]
             elif self.type == 'vertical':
                 if pos[1] <= self.y0 + self.rect.h // 2 and \
@@ -257,7 +257,7 @@ class Counter(pygame.sprite.Sprite):
 class YouWin_image(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
-        self.image = load_image('youWin.png')
+        self.image = load_image('youWin1.png')
         self.color = 'yellow'
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
@@ -268,13 +268,13 @@ class YouWin_image(pygame.sprite.Sprite):
     def update(self):
         if self.v == self.limit:
             if self.color == 'yellow':
-                self.image = load_image('youWin1.png')
+                self.image = load_image('youWin2.png')
                 self.color = 'green'
             elif self.color == 'green':
-                self.image = load_image('youWin2.png')
+                self.image = load_image('youWin3.png')
                 self.color = 'red'
             elif self.color == 'red':
-                self.image = load_image('youWin.png')
+                self.image = load_image('youWin1.png')
                 self.color = 'yellow'
             self.v = 0
         else:

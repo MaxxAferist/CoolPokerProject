@@ -176,8 +176,6 @@ class Poker_Logic():  # Логика покера
             your_combunations.remove('pair')
             your_combunations.remove('three of kind')
             your_combunations.insert(0, 'full house')
-        print(cards, your_cards)
-        print(your_combunations)
         return [i for i in your_combunations if your_combunations.count(i) == 1]
 
     def intersection(self, all_cards, table_cards, count):
@@ -189,8 +187,8 @@ class Poker_Logic():  # Логика покера
         return []
 
     def define_winner(self, table):
-        player_count = self.counter(self.check(self.players[1]))
-        bot_count = self.counter(self.check(self.players[0]))
+        player_count = self.counter(self.check(table.player))
+        bot_count = self.counter(self.check(table.bot))
         if player_count < bot_count:
             return 'bot'
         elif player_count > bot_count:
@@ -305,7 +303,6 @@ class Game():  # Игра
             self.update()
             self.big_blind()
             self.update()
-            self.who_win()
             self.preflop()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
@@ -410,29 +407,30 @@ class Game():  # Игра
 
     def who_win(self):
         im = pygame.sprite.Group()
-        #winner = self.logic.define_winner(self)
-        winner = True
-        if winner:
+        winner = self.logic.define_winner(self)
+        if winner == 'player':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouWin_image(pos)
             im.add(image)
-            while True:
+            running = True
+            while running:
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                        self.go_menu()
+                    if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                        running = False
                 self.all_sprites.draw(self.screen)
                 im.draw(self.screen)
                 im.update()
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
-        else:
+        elif winner == 'bot':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouLose_image(pos)
             im.add(image)
-            while True:
+            running = True
+            while running:
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                        self.go_menu()
+                    if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                        running = False
                 self.all_sprites.draw(self.screen)
                 im.draw(self.screen)
                 im.update()
@@ -637,6 +635,7 @@ class Poker_graphic():
 
     def bet(self, table, player, first_value, last_value):
         table.buttons[3].action = lambda: self.reise(table, player, first_value, last_value)
+        self.close_reise_flag = False
         self.go_bid = True
         while self.go_bid:
             for event in pygame.event.get():
@@ -650,6 +649,7 @@ class Poker_graphic():
             table.clock.tick(FPS)
 
     def reise(self, table, player, first_value, last_value):
+        table.buttons[3].action = self.close_reise
         slider = Slider(WIDTH * 0.75, HEIGHT * 0.88, 'vertical', 300 * KOEF, table)
         all_sprites = pygame.sprite.Group()
         all_sprites.add(slider.line, slider)
@@ -662,6 +662,8 @@ class Poker_graphic():
                     running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     table.start_mini_menu()
+            if self.close_reise_flag:
+                running = False
             table.all_sprites.draw(table.screen)
             table.button_sprites.update()
             table.button_sprites.draw(table.screen)
@@ -673,5 +675,11 @@ class Poker_graphic():
 
             count = round((last_value - first_value) * slider.value + first_value)
             counter.gererate_count(count)
-        player.reise(round((last_value - first_value) * slider.value + first_value))
-        self.go_bid = False
+        if self.close_reise_flag:
+            self.bet(table, player, first_value, last_value)
+        else:
+            player.reise(round((last_value - first_value) * slider.value + first_value))
+            self.go_bid = False
+
+    def close_reise(self):
+        self.close_reise_flag = True
