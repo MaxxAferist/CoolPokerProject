@@ -263,6 +263,7 @@ class Game():  # Игра
             self.update()
             self.big_blind()
             self.update()
+            self.who_win()
             self.preflop()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
@@ -366,7 +367,35 @@ class Game():  # Игра
         self.player_bid_count.gererate_count(self.player.bid)
 
     def who_win(self):
-        winner = self.logic.define_winner(self)
+        im = pygame.sprite.Group()
+        #winner = self.logic.define_winner(self)
+        winner = True
+        if winner:
+            pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
+            image = YouWin_image(pos)
+            im.add(image)
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                        self.go_menu()
+                self.all_sprites.draw(self.screen)
+                im.draw(self.screen)
+                im.update()
+                pygame.display.flip()
+                self.screen.fill(pygame.Color(0, 0, 0))
+        else:
+            pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
+            image = YouLose_image(pos)
+            im.add(image)
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                        self.go_menu()
+                self.all_sprites.draw(self.screen)
+                im.draw(self.screen)
+                im.update()
+                pygame.display.flip()
+                self.screen.fill(pygame.Color(0, 0, 0))
 
     def add_sprites(self):  # Все спрайты на столе
         w_card = Place_from_card.image.get_width()

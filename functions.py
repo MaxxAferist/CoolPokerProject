@@ -252,3 +252,81 @@ class Counter(pygame.sprite.Sprite):
         self.rect.y = self.y
         self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
                                     (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
+
+
+class YouWin_image(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = load_image('youWin.png')
+        self.color = 'yellow'
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.limit = 20
+        self.v = 1
+
+    def update(self):
+        if self.v == self.limit:
+            if self.color == 'yellow':
+                self.image = load_image('youWin1.png')
+                self.color = 'green'
+            elif self.color == 'green':
+                self.image = load_image('youWin2.png')
+                self.color = 'red'
+            elif self.color == 'red':
+                self.image = load_image('youWin.png')
+                self.color = 'yellow'
+            self.v = 0
+        else:
+            self.v += 1
+
+
+class YouLose_image(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = load_image('youLose.png')
+        self.color = 'yellow'
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.limit = 20
+        self.v = 1
+
+    def update(self):
+        if self.v == self.limit:
+            if self.color == 'yellow':
+                self.image = load_image('youLose.png')
+                self.color = 'green'
+            elif self.color == 'green':
+                self.image = load_image('youLose.png')
+                self.color = 'red'
+            elif self.color == 'red':
+                self.image = load_image('youLose.png')
+                self.color = 'yellow'
+            self.v = 0
+        else:
+            self.v += 1
+
+
+class Win_particle(pygame.sprite.Sprite):
+    fire = [load_image("star.png")]
+    for scale in (5, 10, 20):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__()
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+
+        self.gravity = 1
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect((0, 0, 100, 100)):
+            self.kill()
+
