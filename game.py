@@ -137,15 +137,11 @@ class Poker_Logic():  # Логика покера
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
 
         # Флеш рояль(Энергетик от суперсел)
-        if (
-                (len(set(card_suits)) != 1 and (max([all_suits.count(i) for i in all_suits]) >= 5) or len(
-                    set(all_suits)) <= 3)) and \
+        if (max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3) and \
                 (len(lst_straight) == 5 and lst_straight[0] == '10'):
             your_combunations.append((combinations[0], 10))
         # Стрит флеш
-        if (
-                (len(set(card_suits)) != 1 and (max([all_suits.count(i) for i in all_suits]) >= 5) or len(
-                    set(all_suits)) <= 3)) and \
+        if (max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3) and \
                 (len(lst_straight) == 5):
             your_combunations.append((combinations[5], lst_straight))
         kare = self.intersection(all_values, card_val, 4)
@@ -172,10 +168,24 @@ class Poker_Logic():  # Логика покера
         # Старшая карта
         your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
         # Фулхаус
-        if 'pair' in your_combunations and 'three of kind' in your_combunations:
-            your_combunations.remove('pair')
-            your_combunations.remove('three of kind')
-            your_combunations.insert(0, 'full house')
+        for i in your_combunations:
+            if 'pair' in i and 'three of kind' in i:
+                your_combunations.remove(('pair', pairs))
+                your_combunations.remove(('three of kind', three_of_kind))
+                full_house = pairs + three_of_kind
+                your_combunations.insert(0, ('full house', [i for i in full_house if full_house.count(i) == 1]))
+                break
+            elif len(set([i for i in all_values if all_values.count(i) >= 3])) >= 1 and 'pair' in i:
+                your_combunations.remove(('pair', pairs))
+                full_house = pairs + [i for i in set([i for i in all_values if all_values.count(i) >= 3])]
+                your_combunations.insert(0, ('full house', [i for i in full_house if full_house.count(i) == 1]))
+                break
+            elif len(set([i for i in all_values if all_values.count(i) >= 2])) >= 1 and 'three of kind' in i:
+                your_combunations.remove(('three of kind', three_of_kind))
+                full_house = [i for i in set([i for i in all_values if all_values.count(i) >= 2])] + three_of_kind
+                your_combunations.insert(0, ('full house', [i for i in full_house if full_house.count(i) == 1]))
+                break
+        print(cards, your_cards)
         return [i for i in your_combunations if your_combunations.count(i) == 1]
 
     def intersection(self, all_cards, table_cards, count):
@@ -186,9 +196,11 @@ class Poker_Logic():  # Логика покера
             return list(lst)
         return []
 
-    def define_winner(self, table):
-        player_count = self.counter(self.check(table.player))
-        bot_count = self.counter(self.check(table.bot))
+    def define_winner(self):
+        player_count = self.counter(self.check(self.players[1]))
+        bot_count = self.counter(self.check(self.players[0]))
+        print(self.check(self.players[1]))
+        print(self.check(self.players[0]))
         if player_count < bot_count:
             return 'bot'
         elif player_count > bot_count:
@@ -204,19 +216,21 @@ class Poker_Logic():  # Логика покера
             if i[0] == 'royal flush':
                 count += 1000
             if i[0] == 'straight flush':
-                count += 900 + values.index(i[1][-1]) + 1
+                count += 900 + values.index(i[1][-1]) + 9
             if i[0] == 'four of kind':
-                count += 800 + values.index(i[1][0]) + 1
+                count += 800 + values.index(i[1][0]) + 8
+            if i[0] == 'full house':
+                count += 700 + (values.index(i[1][0]) + values.index(i[1][1])) // 2 + 7
             if i[0] == 'flush':
                 count += 600
             if i[0] == 'straight':
-                count += 500 + values.index(i[1][-1]) + 1
+                count += 500 + values.index(i[1][-1]) + 5
             if i[0] == 'three of kind':
-                count += 400 + values.index(i[1][0]) + 1
+                count += 400 + values.index(i[1][0]) + 4
             if i[0] == 'two pair':
-                count += 300 + values.index(i[1][0]) + 1 + values.index(i[1][1]) + 1
+                count += 300 + (values.index(i[1][0]) + values.index(i[1][1])) // 2 + 3
             if i[0] == 'pair':
-                count += 200 + values.index(i[1][0]) + 1
+                count += 200 + values.index(i[1][0]) + 2
             if i[0] == 'high card':
                 count += 100 + values.index(i[1]) + 1
         return count
@@ -323,6 +337,7 @@ class Game():  # Игра
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
                 self.update()
+            print(self.logic.define_winner())
             self.who_win()
 
     def random_blind(self):
@@ -407,7 +422,7 @@ class Game():  # Игра
 
     def who_win(self):
         im = pygame.sprite.Group()
-        winner = self.logic.define_winner(self)
+        winner = self.logic.define_winner()
         if winner == 'player':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouWin_image(pos)
@@ -598,8 +613,8 @@ class Poker_graphic():
             if not any(list(map(lambda x: x.motion, cards.sprites()))):
                 x = table.table_place_sprites.sprites()[-2].rect.x
                 y = table.table_place_sprites.sprites()[-2].rect.y
-                value = table_cards[-2].value
-                suit = table_cards[-2].suit
+                value = table_cards[-1].value
+                suit = table_cards[-1].suit
                 table_card = Card(value, suit, (x, y))
                 table.all_sprites.add(table_card)
                 table.all_sprites.draw(table.screen)
