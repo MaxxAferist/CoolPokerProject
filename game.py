@@ -183,7 +183,6 @@ class Poker_Logic():  # Логика покера
                 full_house = [i for i in set([i for i in all_values if all_values.count(i) >= 2])] + three_of_kind
                 your_combunations.insert(0, ('full house', [i for i in full_house if full_house.count(i) == 1]))
                 break
-        print(cards, your_cards)
         return [i for i in your_combunations if your_combunations.count(i) == 1]
 
     def intersection(self, all_cards, table_cards, count):
@@ -339,7 +338,7 @@ class Game():  # Игра
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
                 self.update()
-            print(self.logic.define_winner())
+            self.open_bot_cards()
             self.who_win()
 
     def random_blind(self):
@@ -457,6 +456,15 @@ class Game():  # Игра
                 self.screen.fill(pygame.Color(0, 0, 0))
         self.update()
         self.end_distribution(winner)
+
+    def open_bot_cards(self):
+        for i in range(2):
+            x = self.bot_place_sprites.sprites()[i].rect.x
+            y = self.bot_place_sprites.sprites()[i].rect.y
+            value = self.bot.cards[i].value
+            suit = self.bot.cards[i].suit
+            bot_card = Card(value, suit, (x, y))
+            self.cards_sprites.add(bot_card)
 
     def add_sprites(self):  # Все спрайты на столе
         w_card = Place_from_card.image.get_width()
