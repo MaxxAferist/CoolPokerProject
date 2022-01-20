@@ -307,6 +307,31 @@ class YouLose_image(pygame.sprite.Sprite):
         else:
             self.v += 1
 
+class Draw_image(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = load_image('draw.png')
+        self.color = 'yellow'
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.limit = 20
+        self.v = 1
+
+    def update(self):
+        if self.v == self.limit:
+            if self.color == 'yellow':
+                self.image = load_image('draw.png')
+                self.color = 'green'
+            elif self.color == 'green':
+                self.image = load_image('draw.png')
+                self.color = 'red'
+            elif self.color == 'red':
+                self.image = load_image('draw.png')
+                self.color = 'yellow'
+            self.v = 0
+        else:
+            self.v += 1
 
 class Win_particle(pygame.sprite.Sprite):
     fire = [load_image("star.png")]

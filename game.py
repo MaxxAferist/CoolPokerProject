@@ -143,14 +143,24 @@ class Poker_Logic():  # Логика покера
         # Стрит флеш
         if (max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3) and \
                 (len(lst_straight) == 5):
-            your_combunations.append((combinations[5], lst_straight))
+            your_combunations.append((combinations[1], lst_straight))
         kare = self.intersection(all_values, card_val, 4)
         # Каре(как у девочек дед инсайдих)
         if len(kare) == 1:
-            your_combunations.append((combinations[8], kare))
+            your_combunations.append((combinations[2], kare))
+        # Фулхаус
+        if len(set([i for i in all_values if all_values.count(i) == 3])) >= 1 and len(set([i for i in all_values if all_values.count(i) == 2])) >= 1:
+            lst2 = []
+            if len(set([i for i in all_values if all_values.count(i) >= 2])) > 2:
+                for j in set([i for i in all_values if all_values.count(i) >= 2]):
+                    if j in [i[0] for i in your_cards]:
+                        lst2.append(j)
+            lst2 = set(max(lst2))
+            lst = set([i for i in all_values if all_values.count(i) >= 3]) | lst2
+            your_combunations.append((combinations[3], list(lst)))
         # Флеш(энергетик)
         if max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3:
-            your_combunations.append((combinations[3], 7))
+            your_combunations.append((combinations[4], 7))
         # Стрит(улица)
         if len(lst_straight) == 5:
             your_combunations.append((combinations[5], lst_straight))
@@ -167,24 +177,6 @@ class Poker_Logic():  # Логика покера
             your_combunations.append((combinations[8], pairs))
         # Старшая карта
         your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
-        # Фулхаус
-        for i in your_combunations:
-            if 'pair' in i and 'three of kind' in i:
-                your_combunations.remove(('pair', pairs))
-                your_combunations.remove(('three of kind', three_of_kind))
-                full_house = pairs + three_of_kind
-                your_combunations.insert(0, ('full house', [i for i in full_house if full_house.count(i) == 1]))
-                break
-            elif len(set([i for i in all_values if all_values.count(i) >= 3])) >= 1 and 'pair' in i:
-                your_combunations.remove(('pair', pairs))
-                full_house = pairs + [i for i in set([i for i in all_values if all_values.count(i) >= 3])]
-                your_combunations.insert(0, ('full house', [i for i in full_house if full_house.count(i) == 1]))
-                break
-            elif len(set([i for i in all_values if all_values.count(i) >= 2])) >= 1 and 'three of kind' in i:
-                your_combunations.remove(('three of kind', three_of_kind))
-                full_house = [i for i in set([i for i in all_values if all_values.count(i) >= 2])] + three_of_kind
-                your_combunations.insert(0, ('full house', [i for i in full_house if full_house.count(i) == 1]))
-                break
         print(cards, your_cards)
         return [i for i in your_combunations if your_combunations.count(i) == 1]
 
@@ -440,6 +432,20 @@ class Game():  # Игра
         elif winner == 'bot':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouLose_image(pos)
+            im.add(image)
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                        running = False
+                self.all_sprites.draw(self.screen)
+                im.draw(self.screen)
+                im.update()
+                pygame.display.flip()
+                self.screen.fill(pygame.Color(0, 0, 0))
+        else:
+            pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
+            image = Draw_image(pos)
             im.add(image)
             running = True
             while running:
