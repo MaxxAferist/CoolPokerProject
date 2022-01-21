@@ -131,6 +131,7 @@ class Poker_Logic():  # Логика покера
             if i not in no_rep_card:
                 no_rep_card.append(i)
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
+        print(lst_straight)
 
         # Флеш рояль(Энергетик от суперсел)
         if (max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3) and \
@@ -152,9 +153,10 @@ class Poker_Logic():  # Логика покера
                 for j in set([i for i in all_values if all_values.count(i) >= 2]):
                     if j in [i[0] for i in your_cards]:
                         lst2.append(j)
-            lst2 = set(max(lst2))
-            lst = set([i for i in all_values if all_values.count(i) >= 3]) | lst2
-            your_combunations.append((combinations[3], list(lst)))
+            if len(lst2) > 0:
+                lst2 = set(max(lst2))
+                lst = set([i for i in all_values if all_values.count(i) >= 3]) | lst2
+                your_combunations.append((combinations[3], list(lst)))
         # Флеш(энергетик)
         if max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3:
             your_combunations.append((combinations[4], 7))
@@ -174,6 +176,8 @@ class Poker_Logic():  # Логика покера
             your_combunations.append((combinations[8], pairs))
         # Старшая карта
         your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
+        print(cards, your_cards)
+        print(your_combunations)
         return [i for i in your_combunations if your_combunations.count(i) == 1]
 
     def intersection(self, all_cards, table_cards, count):
@@ -186,6 +190,7 @@ class Poker_Logic():  # Логика покера
 
     def define_winner(self, table):
         players_counts = sorted(table.players, key=lambda x: self.counter(self.check(x)))
+        print(players_counts)
         return players_counts[-1]
 
     def counter(self, combunations):
