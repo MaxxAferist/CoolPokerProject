@@ -1,8 +1,6 @@
 import pygame
-
 from functions import *
 from mini_menu import *
-
 
 pygame.init()
 
@@ -70,8 +68,6 @@ class Poker_Logic():  # Логика покера
 
     def preflop(self):  # Выдача карт игрокам
         for player in self.players:
-            self.bank += player.bid
-            player.bid = 0
             player.cards = [self.deck.pop(), self.deck.pop()]
 
     def flop(self):  # 3 карты на стол
@@ -149,7 +145,8 @@ class Poker_Logic():  # Логика покера
         if len(kare) == 1:
             your_combunations.append((combinations[2], kare))
         # Фулхаус
-        if len(set([i for i in all_values if all_values.count(i) == 3])) >= 1 and len(set([i for i in all_values if all_values.count(i) == 2])) >= 1:
+        if len(set([i for i in all_values if all_values.count(i) == 3])) >= 1 and len(
+                set([i for i in all_values if all_values.count(i) == 2])) >= 1:
             lst2 = []
             if len(set([i for i in all_values if all_values.count(i) >= 2])) > 2:
                 for j in set([i for i in all_values if all_values.count(i) >= 2]):
@@ -177,7 +174,6 @@ class Poker_Logic():  # Логика покера
             your_combunations.append((combinations[8], pairs))
         # Старшая карта
         your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
-        print(cards, your_cards)
         return [i for i in your_combunations if your_combunations.count(i) == 1]
 
     def intersection(self, all_cards, table_cards, count):
@@ -188,17 +184,9 @@ class Poker_Logic():  # Логика покера
             return list(lst)
         return []
 
-    def define_winner(self):
-        player_count = self.counter(self.check(self.players[1]))
-        bot_count = self.counter(self.check(self.players[0]))
-        print(self.check(self.players[1]))
-        print(self.check(self.players[0]))
-        if player_count < bot_count:
-            return 'bot'
-        elif player_count > bot_count:
-            return 'player'
-        else:
-            return 'draw'
+    def define_winner(self, table):
+        players_counts = sorted(table.players, key=lambda x: self.counter(self.check(x)))
+        return players_counts[-1]
 
     def counter(self, combunations):
         values = ['2', '3', '4', '5', '6', '7', '8', '9',
@@ -247,44 +235,49 @@ class Poker_Logic():  # Логика покера
             cards.append((i.value, i.suit))
         return cards
 
+    def end_distribution(self, player):
+        for pl in self.players:
+            pl.cards = [None, None]
+            pl.play = True
+            pl.move = False
+            self.bank += pl.bid
+            pl.bid = 0
+        player.money += self.bank
+        self.bank = 0
+        self.table_cards = []
+
 
 class Game():  # Игра
     def __init__(self, go_menu):
         pygame.display.set_caption('Game')
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
-
         self.all_sprites = pygame.sprite.Group()
         self.player_place_sprites = pygame.sprite.Group()
         self.table_place_sprites = pygame.sprite.Group()
         self.bot_place_sprites = pygame.sprite.Group()
         self.button_sprites = pygame.sprite.Group()
         self.fon_sprite = pygame.sprite.Group()
-
+        self.cards_sprites = pygame.sprite.Group()
         self.fon = pygame.sprite.Sprite(self.all_sprites, self.fon_sprite)
         fon_image = pygame.transform.scale(load_image('Poker_table_fon.png'), (WIDTH, HEIGHT))
         self.fon.image = fon_image
         self.fon.rect = fon_image.get_rect()
-
         robot_image = load_image('bot_head.png')
         koloda_image = load_image('Koloda_card.png')
-
         self.robot_image = pygame.transform.scale(robot_image, (int(robot_image.get_width() * KOEF),
                                                                 int(robot_image.get_height() * KOEF)))
         self.koloda_image = pygame.transform.scale(koloda_image, (int(koloda_image.get_width() * KOEF),
                                                                   int(koloda_image.get_height() * KOEF)))
-
         self.graph = Poker_graphic()
         self.logic = Poker_Logic()
         self.bot = Poker_player(1000, 'bot')
         self.player = Poker_player(1000, 'player')
         self.players = [self.bot, self.player]
         self.logic.players = [self.bot, self.player]
-
         buttons_width = 300
         buttons_height = 60
         font_size = 50
-
         self.buttons = [Button('Пас', (WIDTH * 0.8, HEIGHT * 0.75 - 15 * KOEF),
                                (buttons_width, buttons_height), font_size, termit),
                         Button('Чек', (WIDTH * 0.8, HEIGHT * 0.75 + 55 * KOEF),
@@ -295,7 +288,6 @@ class Game():  # Игра
                                (buttons_width, buttons_height), font_size, termit),
                         Button('Колл', (WIDTH * 0.8, HEIGHT * 0.75 - 155 * KOEF),
                                (buttons_width, buttons_height), font_size, lambda: self.player.call(self))]
-
         self.button_sprites.add(self.buttons)
         self.add_sprites()
         self.go_menu = go_menu
@@ -329,7 +321,7 @@ class Game():  # Игра
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
                 self.update()
-            print(self.logic.define_winner())
+            self.open_bot_cards()
             self.who_win()
 
     def random_blind(self):
@@ -394,16 +386,15 @@ class Game():  # Игра
     def waiting(self, seconds):
         start = time.perf_counter()
         end = time.perf_counter()
-
         while end - start < seconds:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.start_mini_menu()
             self.all_sprites.draw(self.screen)
+            self.cards_sprites.draw(self.screen)
             pygame.display.flip()
             self.screen.fill(pygame.Color(0, 0, 0))
             end = time.perf_counter()
-
 
     def update(self):
         self.money_count.gererate_count(self.player.money)
@@ -414,8 +405,8 @@ class Game():  # Игра
 
     def who_win(self):
         im = pygame.sprite.Group()
-        winner = self.logic.define_winner()
-        if winner == 'player':
+        winner = self.logic.define_winner(self)
+        if winner.player_type == 'player':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouWin_image(pos)
             im.add(image)
@@ -425,11 +416,13 @@ class Game():  # Игра
                     if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                         running = False
                 self.all_sprites.draw(self.screen)
+                self.cards_sprites.draw(self.screen)
                 im.draw(self.screen)
                 im.update()
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
-        elif winner == 'bot':
+
+        elif winner.player_type == 'bot':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouLose_image(pos)
             im.add(image)
@@ -439,24 +432,22 @@ class Game():  # Игра
                     if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                         running = False
                 self.all_sprites.draw(self.screen)
+                self.cards_sprites.draw(self.screen)
                 im.draw(self.screen)
                 im.update()
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
-        else:
-            pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
-            image = Draw_image(pos)
-            im.add(image)
-            running = True
-            while running:
-                for event in pygame.event.get():
-                    if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
-                        running = False
-                self.all_sprites.draw(self.screen)
-                im.draw(self.screen)
-                im.update()
-                pygame.display.flip()
-                self.screen.fill(pygame.Color(0, 0, 0))
+        self.update()
+        self.end_distribution(winner)
+
+    def open_bot_cards(self):
+        for i in range(2):
+            x = self.bot_place_sprites.sprites()[i].rect.x
+            y = self.bot_place_sprites.sprites()[i].rect.y
+            value = self.bot.cards[i].value
+            suit = self.bot.cards[i].suit
+            bot_card = Card(value, suit, (x, y))
+            self.cards_sprites.add(bot_card)
 
     def add_sprites(self):  # Все спрайты на столе
         w_card = Place_from_card.image.get_width()
@@ -468,7 +459,6 @@ class Game():  # Игра
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.table_place_sprites.add(place)
-
         left_top = (WIDTH - (w_card * 2 + 40 * KOEF)) // 2
         up_top = (HEIGHT - h_card) * 0.85
         for i in range(2):
@@ -476,7 +466,6 @@ class Game():  # Игра
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.player_place_sprites.add(place)
-
         w_card_k = Place_from_card.image.get_width()
         h_card_k = Place_from_card.image.get_height()
         left_top = (WIDTH - (w_card_k * 2 + 40 * KOEF)) // 2
@@ -486,25 +475,20 @@ class Game():  # Игра
             place = Place_from_card(pos)
             self.all_sprites.add(place)
             self.bot_place_sprites.add(place)
-
         robot = pygame.sprite.Sprite(self.all_sprites)
         robot.image = pygame.transform.scale(self.robot_image, (int(w_card_k * 0.75), int(h_card_k * 0.75)))
         robot.rect = self.robot_image.get_rect()
-
         up_top = int((HEIGHT - h_card) * 0.07)
         left_top = (WIDTH - (w_card_k * 2 + 40 * KOEF)) // 2 - w_card_k
         robot.rect.x = left_top
         robot.rect.y = up_top
-
         self.koloda = pygame.sprite.Sprite(self.all_sprites)
         self.koloda.image = pygame.transform.scale(self.koloda_image, (w_card_k, h_card_k))
         self.koloda.rect = self.koloda_image.get_rect()
-
         up_top = (HEIGHT - h_card) * 0.4
         left_top = (WIDTH - self.koloda.rect.w) * 0.05
         self.koloda.rect.x = left_top
         self.koloda.rect.y = up_top
-
         self.money_count = Counter(self.player.money, (WIDTH * 0.434, HEIGHT * 0.9, 250 * KOEF, 70 * KOEF), 100 * KOEF)
         self.all_sprites.add(self.money_count)
         self.bot_money_count = Counter(self.bot.money, (WIDTH * 0.313, HEIGHT * 0.23, 150 * KOEF, 60 * KOEF), 70 * KOEF)
@@ -513,12 +497,18 @@ class Game():  # Игра
         self.all_sprites.add(self.bank_count)
         self.bot_bid_count = Counter(self.bot.bid, (WIDTH * 0.408, HEIGHT * 0.57, 150 * KOEF, 60 * KOEF), 70 * KOEF)
         self.all_sprites.add(self.bot_bid_count)
-        self.player_bid_count = Counter(self.player.bid, (WIDTH * 0.514, HEIGHT * 0.57, 150 * KOEF, 60 * KOEF), 70 * KOEF)
+        self.player_bid_count = Counter(self.player.bid, (WIDTH * 0.514, HEIGHT * 0.57, 150 * KOEF, 60 * KOEF),
+                                        70 * KOEF)
         self.all_sprites.add(self.player_bid_count)
 
     def start_mini_menu(self):
         self.mini_menu = Mini_menu(self)
         self.mini_menu.run(self)
+
+    def end_distribution(self, player):
+        self.logic.end_distribution(player)
+        for elem in self.cards_sprites:
+            elem.kill()
 
 
 class Poker_graphic():
@@ -545,12 +535,13 @@ class Poker_graphic():
             y1 = table.koloda.rect.y
             card.get_trajectory((x1, y1), (x2, y2))
             cards.add(card)
-        table.all_sprites.add(cards)
+        table.cards_sprites.add(cards)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     table.start_mini_menu()
             table.all_sprites.draw(table.screen)
+            table.cards_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
@@ -562,7 +553,8 @@ class Poker_graphic():
                     value = player_cards[i].value
                     suit = player_cards[i].suit
                     player_card = Card(value, suit, (x, y))
-                    table.all_sprites.add(player_card)
+                    table.cards_sprites.add(player_card)
+                    table.cards_sprites.draw(table.screen)
                     table.all_sprites.draw(table.screen)
                 break
 
@@ -576,12 +568,13 @@ class Poker_graphic():
             y1 = table.koloda.rect.y
             card.get_trajectory((x1, y1), (x2, y2))
             cards.add(card)
-        table.all_sprites.add(cards)
+        table.cards_sprites.add(cards)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     table.start_mini_menu()
             table.all_sprites.draw(table.screen)
+            table.cards_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
@@ -593,8 +586,9 @@ class Poker_graphic():
                     value = table_cards[i].value
                     suit = table_cards[i].suit
                     table_card = Card(value, suit, (x, y))
-                    table.all_sprites.add(table_card)
                     table.all_sprites.draw(table.screen)
+                    table.cards_sprites.add(table_card)
+                    table.cards_sprites.draw(table.screen)
                 break
 
     def tern(self, table, table_cards):
@@ -606,12 +600,13 @@ class Poker_graphic():
         y1 = table.koloda.rect.y
         card.get_trajectory((x1, y1), (x2, y2))
         cards.add(card)
-        table.all_sprites.add(cards)
+        table.cards_sprites.add(card)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     table.start_mini_menu()
             table.all_sprites.draw(table.screen)
+            table.cards_sprites.draw(table.screen)
             cards.draw(table.screen)
             cards.update()
             pygame.display.flip()
@@ -622,8 +617,9 @@ class Poker_graphic():
                 value = table_cards[-1].value
                 suit = table_cards[-1].suit
                 table_card = Card(value, suit, (x, y))
-                table.all_sprites.add(table_card)
                 table.all_sprites.draw(table.screen)
+                table.cards_sprites.add(table_card)
+                table.cards_sprites.draw(table.screen)
                 break
 
     def river(self, table, table_cards):
@@ -635,12 +631,13 @@ class Poker_graphic():
         y1 = table.koloda.rect.y
         card.get_trajectory((x1, y1), (x2, y2))
         cards.add(card)
-        table.all_sprites.add(cards)
+        table.cards_sprites.add(cards)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     table.start_mini_menu()
             table.all_sprites.draw(table.screen)
+            table.cards_sprites.draw(table.screen)
             cards.update()
             pygame.display.flip()
             table.screen.fill(pygame.Color(0, 0, 0))
@@ -650,8 +647,9 @@ class Poker_graphic():
                 value = table_cards[-1].value
                 suit = table_cards[-1].suit
                 table_card = Card(value, suit, (x, y))
-                table.all_sprites.add(table_card)
                 table.all_sprites.draw(table.screen)
+                table.cards_sprites.add(table_card)
+                table.cards_sprites.draw(table.screen)
                 break
 
     def bet(self, table, player, first_value, last_value):
@@ -663,6 +661,7 @@ class Poker_graphic():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     table.start_mini_menu()
             table.all_sprites.draw(table.screen)
+            table.cards_sprites.draw(table.screen)
             table.button_sprites.update()
             table.button_sprites.draw(table.screen)
             pygame.display.flip()
@@ -686,6 +685,7 @@ class Poker_graphic():
             if self.close_reise_flag:
                 running = False
             table.all_sprites.draw(table.screen)
+            table.cards_sprites.draw(table.screen)
             table.button_sprites.update()
             table.button_sprites.draw(table.screen)
             all_sprites.update()
@@ -693,7 +693,6 @@ class Poker_graphic():
             pygame.display.flip()
             table.screen.fill((0, 0, 0))
             table.clock.tick(FPS)
-
             count = round((last_value - first_value) * slider.value + first_value)
             counter.gererate_count(count)
         if self.close_reise_flag:

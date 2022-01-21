@@ -4,6 +4,7 @@ import sqlite3
 from menu import *
 from Window_reg import Window_reg
 from Window_start import Window_start
+from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import *
 
 
@@ -15,6 +16,9 @@ class MainWindow(QMainWindow, Window_start):
         self.pushButton_2.clicked.connect(self.go_reg)
 
     def start(self):
+        pygame.init()
+        start_menu = Menu()
+        start_menu.run()
         con = sqlite3.connect("data//User_list.db")
         cur = con.cursor()
         User = self.lineEdit.text()
@@ -32,6 +36,8 @@ class MainWindow(QMainWindow, Window_start):
         con.close()
 
     def go_reg(self):
+        ex1 = Reg_Window()
+        ex1.show()
         self.ex = Reg_Window()
         self.ex.show()
         self.close()
