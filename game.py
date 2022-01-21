@@ -131,7 +131,6 @@ class Poker_Logic():  # Логика покера
             if i not in no_rep_card:
                 no_rep_card.append(i)
         lst_straight = self.straight_check(no_rep_all_val, no_rep_card, values)
-        print(lst_straight)
 
         # Флеш рояль(Энергетик от суперсел)
         if (max([all_suits.count(i) for i in all_suits]) >= 5 and len(set(all_suits)) <= 3) and \
@@ -176,8 +175,6 @@ class Poker_Logic():  # Логика покера
             your_combunations.append((combinations[8], pairs))
         # Старшая карта
         your_combunations.append((combinations[9], values[max([values.index(i) for i in [j[0] for j in your_cards]])]))
-        print(cards, your_cards)
-        print(your_combunations)
         return [i for i in your_combunations if your_combunations.count(i) == 1]
 
     def intersection(self, all_cards, table_cards, count):
@@ -190,7 +187,10 @@ class Poker_Logic():  # Логика покера
 
     def define_winner(self, table):
         players_counts = sorted(table.players, key=lambda x: self.counter(self.check(x)))
-        print(players_counts)
+        player_count = self.counter(self.check(self.players[1]))
+        bot_count = self.counter(self.check(self.players[0]))
+        if bot_count == player_count:
+            return players_counts
         return players_counts[-1]
 
     def counter(self, combunations):
@@ -240,14 +240,18 @@ class Poker_Logic():  # Логика покера
             cards.append((i.value, i.suit))
         return cards
 
-    def end_distribution(self, player):
+    def end_distribution(self, player, player2=None):
         for pl in self.players:
             pl.cards = [None, None]
             pl.play = True
             pl.move = False
             self.bank += pl.bid
             pl.bid = 0
-        player.money += self.bank
+        if player2:
+            player.money += self.bank // 2
+            player2.money += self.bank // 2
+        else:
+            player.money += self.bank
         self.bank = 0
         self.table_cards = []
 
@@ -411,7 +415,23 @@ class Game():  # Игра
     def who_win(self):
         im = pygame.sprite.Group()
         winner = self.logic.define_winner(self)
-        if winner.player_type == 'player':
+        if type(winner) == list:
+            pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
+            image = Draw_image(pos)
+            im.add(image)
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                        running = False
+                self.all_sprites.draw(self.screen)
+                self.cards_sprites.draw(self.screen)
+                im.draw(self.screen)
+                im.update()
+                pygame.display.flip()
+                self.screen.fill(pygame.Color(0, 0, 0))
+
+        elif winner.player_type == 'player':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouWin_image(pos)
             im.add(image)
@@ -442,8 +462,13 @@ class Game():  # Игра
                 im.update()
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
-        self.update()
-        self.end_distribution(winner)
+        if type(winner) == list:
+            self.update()
+            self.end_distribution(winner[0], player2=winner[1])
+        else:
+            self.update()
+            self.end_distribution(winner)
+
 
     def open_bot_cards(self):
         for i in range(2):
@@ -510,8 +535,11 @@ class Game():  # Игра
         self.mini_menu = Mini_menu(self)
         self.mini_menu.run(self)
 
-    def end_distribution(self, player):
-        self.logic.end_distribution(player)
+    def end_distribution(self, player, player2=None):
+        if player2:
+            self.logic.end_distribution(player, player2=player2)
+        else:
+            self.logic.end_distribution(player)
         for elem in self.cards_sprites:
             elem.kill()
 
