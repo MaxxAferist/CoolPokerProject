@@ -17,8 +17,6 @@ class MainWindow(QMainWindow, Window_start):
 
     def start(self):
         pygame.init()
-        start_menu = Menu()
-        start_menu.run()
         con = sqlite3.connect("data//User_list.db")
         cur = con.cursor()
         User = self.lineEdit.text()
@@ -28,10 +26,12 @@ class MainWindow(QMainWindow, Window_start):
 
         if result != None:
             pygame.init()
+            self.close()
             start_menu = Menu()
             start_menu.run()
         else:
             self.statusbar.showMessage('Пользователя несуществует')
+
 
         con.close()
 
@@ -40,7 +40,6 @@ class MainWindow(QMainWindow, Window_start):
         ex1.show()
         self.ex = Reg_Window()
         self.ex.show()
-        self.close()
 
 
 class Reg_Window(QMainWindow, Window_reg):

@@ -1,4 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from ctypes import *
+
+KOEF = windll.user32.GetSystemMetrics(0) / 1920
 
 
 class Window_reg(object):
@@ -44,7 +47,7 @@ class Window_reg(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:22pt;\">Регистрация</span></p></body></html>"))
-        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\"><span style=\" font-size:16pt;\">Логин</span></p></body></html>"))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p align=\"right\"><span style=\" font-size:16pt;\">Пароль</span></p></body></html>"))
+        self.label.setText(_translate("MainWindow", f"<html><head/><body><p align=\"center\"><span style=\" font-size:{22 * KOEF}pt;\">Регистрация</span></p></body></html>"))
+        self.label_2.setText(_translate("MainWindow", f"<html><head/><body><p align=\"right\"><span style=\" font-size:{16 * KOEF}pt;\">Логин</span></p></body></html>"))
+        self.label_3.setText(_translate("MainWindow", f"<html><head/><body><p align=\"right\"><span style=\" font-size:{16 * KOEF}pt;\">Пароль</span></p></body></html>"))
         self.pushButton.setText(_translate("MainWindow", "Зарегистрироваться"))

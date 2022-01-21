@@ -5,10 +5,12 @@ import os
 import random
 import time
 
-WIDTH = windll.user32.GetSystemMetrics(0)
-HEIGHT = windll.user32.GetSystemMetrics(1)
+
+WIDTH = 1920
+HEIGHT = 1080
 FPS = 60
-KOEF = WIDTH / 1920
+KOEF = WIDTH / 1980
+KOEF = 1
 pygame.mixer.init()
 SOUNDS = [pygame.mixer.Sound('data//sounds//Click.mp3')]
 

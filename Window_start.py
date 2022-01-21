@@ -1,4 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from ctypes import *
+
+KOEF = windll.user32.GetSystemMetrics(0) / 1920
 
 
 class Window_start(object):
@@ -60,10 +63,10 @@ class Window_start(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Приветсвуем"))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt;\">Приветствуем, в казино &quot;Три Звезды&quot;</span></p></body></html>"))
-        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt;\">Введите логин и пароль</span></p></body></html>"))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt;\">Логин</span></p></body></html>"))
-        self.label_4.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt;\">Пароль</span></p></body></html>"))
+        self.label.setText(_translate("MainWindow", f"<html><head/><body><p align=\"center\"><span style=\" font-size:{16 * KOEF}pt;\">Приветствуем, в казино &quot;Три Звезды&quot;</span></p></body></html>"))
+        self.label_2.setText(_translate("MainWindow", f"<html><head/><body><p align=\"center\"><span style=\" font-size:{16 * KOEF}pt;\">Введите логин и пароль</span></p></body></html>"))
+        self.label_3.setText(_translate("MainWindow", f"<html><head/><body><p align=\"center\"><span style=\" font-size:{16 * KOEF}pt;\">Логин</span></p></body></html>"))
+        self.label_4.setText(_translate("MainWindow", f"<html><head/><body><p align=\"center\"><span style=\" font-size:{16 * KOEF}pt;\">Пароль</span></p></body></html>"))
         self.pushButton.setText(_translate("MainWindow", "Войти"))
-        self.label_5.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt;\">Если у вас нет регистрации(Нелегалы)</span></p></body></html>"))
+        self.label_5.setText(_translate("MainWindow", f"<html><head/><body><p align=\"center\"><span style=\" font-size:{16 * KOEF}pt;\">Если у вас нет регистрации(Нелегалы)</span></p></body></html>"))
         self.pushButton_2.setText(_translate("MainWindow", "Регистрация"))

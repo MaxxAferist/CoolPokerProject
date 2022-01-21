@@ -76,7 +76,7 @@ class Menu():
 
     def run(self):
         pygame.mixer.music.load('data//music//M. Shubin - Drive (demo).mp3')
-        pygame.mixer.music.play()
+        pygame.mixer.music.play(-1)
         self.running = True
         while self.running:
             for event in pygame.event.get():

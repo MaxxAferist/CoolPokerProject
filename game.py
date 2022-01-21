@@ -252,6 +252,7 @@ class Poker_Logic():  # Логика покера
             player2.money += self.bank // 2
         else:
             player.money += self.bank
+        self.deck = self.full_deck()
         self.bank = 0
         self.table_cards = []
 
@@ -302,35 +303,41 @@ class Game():  # Игра
         self.go_menu = go_menu
 
     def run(self):
-        pygame.mixer.music.load('data//music//Sergey Shubin - Games of life. Part 1.mp3')
-        pygame.mixer.music.play()
-        while self.player.money > 0:
+        pygame.mixer.music.load('data//music//Mark Shubin - Path of life.mp3')
+        pygame.mixer.music.play(-1)
+        while self.player.money > 0 and self.bot.money > 0:
             self.random_blind()
             self.little_blind()
             self.update()
             self.big_blind()
             self.update()
             self.preflop()
+            self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
                 self.update()
             self.flop()
+            self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
                 self.update()
             self.tern()
+            self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
                 self.update()
             self.river()
+            self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0:
                 self.bet()
                 self.update()
             self.open_bot_cards()
+            self.update()
+            self.waiting(2)
             self.who_win()
 
     def random_blind(self):
@@ -339,6 +346,8 @@ class Game():  # Игра
     def little_blind(self):
         for i in range(len(self.players)):
             if self.players[i].move and self.players[i].play:
+                if self.players[i].player_type == 'bot':
+                    self.waiting(1)
                 self.players[i].little_blind()
                 if i + 1 < len(self.players):
                     self.players[i + 1].move = True
@@ -349,6 +358,8 @@ class Game():  # Игра
     def big_blind(self):
         for i in range(len(self.players)):
             if self.players[i].move and self.players[i].play:
+                if self.players[i].player_type == 'bot':
+                    self.waiting(1)
                 self.players[i].big_blind()
                 if i + 1 < len(self.players):
                     self.players[i + 1].move = True
@@ -430,7 +441,6 @@ class Game():  # Игра
                 im.update()
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
-
         elif winner.player_type == 'player':
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouWin_image(pos)
@@ -690,6 +700,7 @@ class Poker_graphic():
         self.close_reise_flag = False
         self.go_bid = True
         while self.go_bid:
+            table.screen.fill((0, 0, 0))
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     table.start_mini_menu()
@@ -698,7 +709,6 @@ class Poker_graphic():
             table.button_sprites.update()
             table.button_sprites.draw(table.screen)
             pygame.display.flip()
-            table.screen.fill((0, 0, 0))
             table.clock.tick(FPS)
 
     def reise(self, table, player, first_value, last_value):
@@ -710,6 +720,7 @@ class Poker_graphic():
         all_sprites.add(counter)
         running = True
         while running:
+            table.screen.fill((0, 0, 0))
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     running = False
@@ -723,9 +734,8 @@ class Poker_graphic():
             table.button_sprites.draw(table.screen)
             all_sprites.update()
             all_sprites.draw(table.screen)
-            pygame.display.flip()
-            table.screen.fill((0, 0, 0))
             table.clock.tick(FPS)
+            pygame.display.flip()
             count = round((last_value - first_value) * slider.value + first_value)
             counter.gererate_count(count)
         if self.close_reise_flag:
