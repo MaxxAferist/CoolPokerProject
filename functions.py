@@ -13,6 +13,7 @@ KOEF = WIDTH / 1980
 KOEF = 1
 pygame.mixer.init()
 SOUNDS = [pygame.mixer.Sound('data//sounds//Click.mp3')]
+WIN_SOUNDS = [pygame.mixer.Sound('data//sounds//Atlant!c, Hyperreal - Shrill.mp3')]
 
 
 def load_image(name): #Загрузка картинки
