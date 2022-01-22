@@ -258,7 +258,7 @@ class Poker_Logic():  # Логика покера
 
 
 class Game():  # Игра
-    def __init__(self, go_menu):
+    def __init__(self, count, go_menu):
         pygame.display.set_caption('Game')
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
@@ -282,7 +282,7 @@ class Game():  # Игра
         self.graph = Poker_graphic()
         self.logic = Poker_Logic()
         self.bot = Poker_player(1000, 'bot')
-        self.player = Poker_player(1000, 'player')
+        self.player = Poker_player(count, 'player')
         self.players = [self.bot, self.player]
         self.logic.players = [self.bot, self.player]
         buttons_width = 300

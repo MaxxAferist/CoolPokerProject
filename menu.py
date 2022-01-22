@@ -13,8 +13,8 @@ def go_menu():
     start_menu.run()
 
 
-def go_game():
-    run_game = Game(go_menu)
+def go_game(count):
+    run_game = Game(count, go_menu)
     run_game.run()
 
 
@@ -48,7 +48,7 @@ class Beautiful_Fon(pygame.sprite.Sprite):
 
 
 class Menu():
-    def __init__(self, player_count):
+    def __init__(self, player_count, time_timer):
         pygame.display.set_caption('Menu')
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
@@ -64,7 +64,7 @@ class Menu():
         promezh = 5
         self.buttons = [Button('Новая Игра', ((WIDTH - buttons_width * KOEF) // 2,
                                               (HEIGHT - buttons_height * KOEF * 3 - promezh * KOEF * 2) // 2),
-                               (buttons_width, buttons_height), 70, go_game),
+                               (buttons_width, buttons_height), 70, lambda: go_game(player_count)),
                     Button('Настройки', ((WIDTH - buttons_width * KOEF) // 2,
                                          (HEIGHT - buttons_height * KOEF * 3 - promezh * KOEF * 2) // 2 + (promezh + buttons_height) * KOEF),
                            (buttons_width, buttons_height), 70, lambda: go_settings(self)),
@@ -74,8 +74,13 @@ class Menu():
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
 
-        self.info = Count_info(player_count, (1050, 20, 1000, 100), 100)
+        self.info = Count_info(player_count, (1000, 20, 1000, 100), 100)
         self.all_sprites.add(self.info)
+
+        self.time_timer = time_timer
+
+        self.timer = Count_info_timer(self.time_timer, (700, 850, 1150, 100), 100)
+        self.all_sprites.add(self.timer)
 
     def run(self):
         pygame.mixer.music.load('data//music//M. Shubin - Drive (demo).mp3')

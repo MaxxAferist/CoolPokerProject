@@ -6,6 +6,8 @@ from Window_reg import Window_reg
 from Window_start import Window_start
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import *
+import datetime as DT
+import math
 
 
 class MainWindow(QMainWindow, Window_start):
@@ -21,14 +23,27 @@ class MainWindow(QMainWindow, Window_start):
         cur = con.cursor()
         User = self.lineEdit.text()
         Pass = self.lineEdit_2.text()
-        result = cur.execute(f"""SELECT count FROM Users
+        result = cur.execute(f"""SELECT Count, Lust_online FROM Users
                                         WHERE User = '{User}' and Password = '{Pass}'""").fetchone()
 
         if result != None:
+            count = result[0]
             pygame.init()
-            self.close()
-            start_menu = Menu(result[0])
+            now = DT.datetime.now(DT.timezone.utc).astimezone()
+            time_format_1 = "%Y-%m-%d %H:%M:%S"
+            time_format_2 = "%H:%M:%S"
+            print(now)
+            time = (DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - DT.datetime.strptime(result[1], time_format_1)).total_seconds() / 3600
+            time1 = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - DT.datetime.strptime(result[1], time_format_1)
+            time_timer = DT.datetime.strptime('4:00:00', time_format_2) - DT.datetime.strptime(f'{time1}', time_format_2)
+            print(time, time1, time_timer)
+            if time >= 4:
+                n = math.trunc(time / 4)
+                count += 400 * n
+
+            start_menu = Menu(count, time_timer)
             start_menu.run()
+            self.close()
         else:
             self.statusbar.showMessage('Пользователя несуществует')
 

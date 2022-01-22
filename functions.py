@@ -1,9 +1,12 @@
+import datetime
 from ctypes import *
 import pygame
 import sys
 import os
 import random
 import time
+import datetime as DT
+import sqlite3
 
 
 WIDTH = 1920
@@ -385,3 +388,43 @@ class Count_info(pygame.sprite.Sprite):
         self.rect.y = self.y
         self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
                                     (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
+
+
+class Count_info_timer(pygame.sprite.Sprite):
+    def __init__(self, time, pos, font_size):
+        super().__init__()
+        self.x = pos[0]
+        self.y = pos[1]
+        self.w = pos[2]
+        self.h = pos[3]
+        self.font_size = font_size
+        self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
+        self.time = time
+        self.font = pygame.font.Font(None, int(self.font_size))
+        self.text = self.font.render(f"До пополнения счёта {self.time}", True, (255, 255, 255))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
+                                    (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
+        self.limit = 60
+        self.v = 1
+
+    def update(self):
+        if self.v == self.limit:
+            time_format_2 = "%H:%M:%S"
+            self.time2 = DT.datetime.strptime(f'{self.time}', time_format_2) - datetime.timedelta(seconds=1)
+            self.time = self.time - datetime.timedelta(seconds=1)
+            print(self.time)
+            print(self.time2.time())
+            self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
+            self.font = pygame.font.Font(None, int(self.font_size))
+            self.text = self.font.render(f"До пополнения счёта {self.time2.time()}", True, (255, 255, 255))
+            self.rect = self.image.get_rect()
+            self.rect.x = self.x
+            self.rect.y = self.y
+            self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
+                                        (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
+            self.v = 0
+        else:
+            self.v += 1
