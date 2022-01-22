@@ -17,9 +17,10 @@ class Poker_player():  # Класс игрока покера
         self.player_type = player_type
 
     def call(self, table):  # Ставка, равная наибольшей ставке на столе
-        self.bid += max(list(map(lambda x: x.bid, table.players))) - self.bid
+        self.money = self.money - (max(list(map(lambda x: x.bid, table.players))) - self.bid)
+        self.bid = max(list(map(lambda x: x.bid, table.players)))
         self.move = False
-        self.money -= max(list(map(lambda x: x.bid, table.players))) - self.bid
+        table.graph.go_bid = False
 
     def reise(self, bid):  # Ставка, большая чем самая большая
         self.bid += bid
@@ -31,13 +32,16 @@ class Poker_player():  # Класс игрока покера
         self.cards = [None, None]
         self.move = False
 
-    def va_bank(self):  # Ва-банк
+    def va_bank(self, table):  # Ва-банк
         self.bid += self.money
         self.move = False
         self.money = 0
+        table.graph.go_bid = False
 
-    def check(self):  # Пропуск ставки
+    def check(self, table):  # Пропуск ставки
         self.move = False
+        table.graph.go_bid = False
+        table.check = True
 
     def little_blind(self):
         self.bid = 25
@@ -291,11 +295,11 @@ class Game():  # Игра
         buttons_height = 60
         font_size = 50
         self.buttons = [Button('Пас', (WIDTH * 0.8, HEIGHT * 0.75 - 15 * KOEF),
-                               (buttons_width, buttons_height), font_size, termit),
+                               (buttons_width, buttons_height), font_size, lambda: self.fold(self.player)),
                         Button('Чек', (WIDTH * 0.8, HEIGHT * 0.75 + 55 * KOEF),
-                               (buttons_width, buttons_height), font_size, termit),
+                               (buttons_width, buttons_height), font_size, lambda: self.player.check(self)),
                         Button('Ва-Банк', (WIDTH * 0.8, HEIGHT * 0.75 + 125 * KOEF),
-                               (buttons_width, buttons_height), font_size, termit),
+                               (buttons_width, buttons_height), font_size, lambda: self.player.va_bank(self)),
                         Button('Райс', (WIDTH * 0.8, HEIGHT * 0.75 - 85 * KOEF),
                                (buttons_width, buttons_height), font_size, termit),
                         Button('Колл', (WIDTH * 0.8, HEIGHT * 0.75 - 155 * KOEF),
@@ -308,6 +312,8 @@ class Game():  # Игра
         pygame.mixer.music.load('data//music//Mark Shubin - Path of life.mp3')
         pygame.mixer.music.play(-1)
         while self.player.money > 0 and self.bot.money > 0:
+            self.reset = False
+            self.check = False
             self.random_blind()
             self.little_blind()
             self.update()
@@ -316,31 +322,58 @@ class Game():  # Игра
             self.preflop()
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
-                    max(list(map(lambda x: x.bid, self.players))) == 0:
+                    max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
                 self.bet()
                 self.update()
+                if self.reset:
+                    break
+            if self.reset:
+                continue
             self.flop()
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
-                    max(list(map(lambda x: x.bid, self.players))) == 0:
+                    max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
                 self.bet()
                 self.update()
+                if self.reset:
+                    break
+            if self.reset:
+                continue
             self.tern()
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
-                    max(list(map(lambda x: x.bid, self.players))) == 0:
+                    max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
                 self.bet()
                 self.update()
+                if self.reset:
+                    break
+            if self.reset:
+                continue
             self.river()
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
-                    max(list(map(lambda x: x.bid, self.players))) == 0:
+                    max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
                 self.bet()
                 self.update()
+                if self.reset:
+                    break
+            if self.reset:
+                continue
             self.open_bot_cards()
             self.update()
             self.waiting(2)
             self.who_win()
+
+    def fold(self, player):
+        self.reset = True
+        player.fold()
+        for pl in self.players:
+            if not (pl is player):
+                self.logic.bank += pl.bid
+                pl.bid = 0
+                self.end_distribution(pl, False)
+                self.update()
+        self.graph.go_bid = False
 
     def random_blind(self):
         random.choice(self.players).move = True
@@ -493,7 +526,6 @@ class Game():  # Игра
         else:
             self.update()
             self.end_distribution(winner)
-
 
     def open_bot_cards(self):
         for i in range(2):
@@ -711,7 +743,7 @@ class Poker_graphic():
                 break
 
     def bet(self, table, player, first_value, last_value):
-        table.buttons[3].action = lambda: self.reise(table, player, first_value, last_value)
+        table.buttons[3].action = lambda: self.reise(table, player, first_value + 1, last_value)
         self.close_reise_flag = False
         self.go_bid = True
         while self.go_bid:
@@ -725,6 +757,8 @@ class Poker_graphic():
             table.button_sprites.draw(table.screen)
             pygame.display.flip()
             table.clock.tick(FPS)
+            if player.money == 0:
+                self.go_bid = False
 
     def reise(self, table, player, first_value, last_value):
         table.buttons[3].action = self.close_reise
