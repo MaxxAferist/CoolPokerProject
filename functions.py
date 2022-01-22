@@ -366,3 +366,22 @@ class Fishka(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+
+
+class Count_info(pygame.sprite.Sprite):
+    def __init__(self, count, pos, font_size):
+        super().__init__()
+        self.x = pos[0]
+        self.y = pos[1]
+        self.w = pos[2]
+        self.h = pos[3]
+        self.font_size = font_size
+        self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
+        self.count = count
+        self.font = pygame.font.Font(None, int(self.font_size))
+        self.text = self.font.render(f"У вас {self.count} фишек", True, (255, 255, 255))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
+                                    (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))

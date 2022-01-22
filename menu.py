@@ -48,7 +48,7 @@ class Beautiful_Fon(pygame.sprite.Sprite):
 
 
 class Menu():
-    def __init__(self):
+    def __init__(self, player_count):
         pygame.display.set_caption('Menu')
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
@@ -73,6 +73,9 @@ class Menu():
                            (buttons_width, buttons_height), 70, termit)]
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
+
+        self.info = Count_info(player_count, (1050, 20, 1000, 100), 100)
+        self.all_sprites.add(self.info)
 
     def run(self):
         pygame.mixer.music.load('data//music//M. Shubin - Drive (demo).mp3')

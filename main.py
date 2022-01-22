@@ -21,25 +21,23 @@ class MainWindow(QMainWindow, Window_start):
         cur = con.cursor()
         User = self.lineEdit.text()
         Pass = self.lineEdit_2.text()
-        result = cur.execute(f"""SELECT id FROM Users
+        result = cur.execute(f"""SELECT count FROM Users
                                         WHERE User = '{User}' and Password = '{Pass}'""").fetchone()
 
         if result != None:
             pygame.init()
             self.close()
-            start_menu = Menu()
+            start_menu = Menu(result[0])
             start_menu.run()
         else:
             self.statusbar.showMessage('Пользователя несуществует')
 
-
         con.close()
 
     def go_reg(self):
-        ex1 = Reg_Window()
-        ex1.show()
         self.ex = Reg_Window()
         self.ex.show()
+        self.close()
 
 
 class Reg_Window(QMainWindow, Window_reg):
