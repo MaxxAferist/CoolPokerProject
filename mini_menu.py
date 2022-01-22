@@ -27,7 +27,7 @@ class Mini_menu():
         h_btn = w_btn * 0.37
         self.buttons = [Button('Продолжить', (left_top, up_top), (w_btn, h_btn), 43, self.close),
                         Button('Настройки', (left_top, up_top + h_btn + 20), (w_btn, h_btn), 43, lambda: go_settings(other)),
-                        Button('Выйти', (left_top, up_top + h_btn * 2 + 40), (w_btn, h_btn), 43, other.go_menu)]
+                        Button('Выйти', (left_top, up_top + h_btn * 2 + 40), (w_btn, h_btn), 43, lambda: other.go_menu(other.player.money, other.user))]
         self.btn_sprites.add(self.buttons)
 
     def close(self):

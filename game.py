@@ -264,7 +264,8 @@ class Poker_Logic():  # Логика покера
 
 
 class Game():  # Игра
-    def __init__(self, count, go_menu):
+    def __init__(self, count, User, go_menu):
+        self.user = User
         pygame.display.set_caption('Game')
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
@@ -363,6 +364,7 @@ class Game():  # Игра
             self.update()
             self.waiting(2)
             self.who_win()
+        self.go_menu(self.player.money, self.user)
 
     def fold(self, player):
         self.reset = True
@@ -501,7 +503,7 @@ class Game():  # Игра
         elif winner.player_type == 'bot':
             volume = pygame.mixer.music.get_volume()
             pygame.mixer.music.set_volume(0)
-            sound = random.choice(WIN_SOUNDS)
+            sound = random.choice(LOSE_SOUNDS)
             sound.set_volume(volume)
             sound.play()
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF

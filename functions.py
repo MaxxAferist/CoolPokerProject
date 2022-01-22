@@ -7,6 +7,7 @@ import random
 import time
 import datetime as DT
 import sqlite3
+import math
 
 
 WIDTH = windll.user32.GetSystemMetrics(0)
@@ -48,7 +49,14 @@ def load_image(name): #Загрузка картинки
     return image
 
 
-def termit(): #Выход
+def termit(count, User): #Выход
+    con = sqlite3.connect("data//User_list.db")
+    cur = con.cursor()
+    cur.execute(f"""UPDATE Users
+    SET 
+        Count = '{count}'
+    WHERE User = '{User}'""")
+    con.commit()
     pygame.mixer.stop()
     pygame.quit()
     sys.exit()
@@ -409,17 +417,27 @@ class Count_info(pygame.sprite.Sprite):
         self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
                                     (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
 
+    def update(self):
+        self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
+        self.text = self.font.render(f"У вас {self.count} фишек", True, (255, 255, 255))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
+                                    (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
 
 class Count_info_timer(pygame.sprite.Sprite):
-    def __init__(self, time, pos, font_size):
+    def __init__(self, username, pos, font_size, other):
         super().__init__()
+        self.other = other
+        self.user = username
         self.x = pos[0]
         self.y = pos[1]
         self.w = pos[2]
         self.h = pos[3]
         self.font_size = font_size
         self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
-        self.time = time
+        self.time = 0
         self.font = pygame.font.Font(None, int(self.font_size))
         self.text = self.font.render(f"До пополнения счёта {self.time}", True, (255, 255, 255))
         self.rect = self.image.get_rect()
@@ -427,24 +445,44 @@ class Count_info_timer(pygame.sprite.Sprite):
         self.rect.y = self.y
         self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
                                     (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
-        self.limit = 60
-        self.v = 1
 
     def update(self):
-        if self.v == self.limit:
+        if True:
+            time_format_1 = "%Y-%m-%d %H:%M:%S"
             time_format_2 = "%H:%M:%S"
-            self.time2 = DT.datetime.strptime(f'{self.time}', time_format_2) - datetime.timedelta(seconds=1)
-            self.time = self.time - datetime.timedelta(seconds=1)
-            print(self.time)
-            print(self.time2.time())
+            con = sqlite3.connect("data//User_list.db")
+            cur = con.cursor()
+            result = cur.execute(f"""SELECT Count, Lust_online FROM Users
+                                                    WHERE User = '{self.user}'""").fetchone()
+            now = DT.datetime.now(DT.timezone.utc).astimezone()
+            now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
+            last_time = DT.datetime.strptime(result[1], time_format_1)
+            hours = (DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - last_time).total_seconds() / 3600
+            time = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - last_time
+            self.time = DT.datetime.strptime('4:00:00', time_format_2) - DT.datetime.strptime(f'{time}', time_format_2)
+            if hours >= 4:
+                n = math.trunc(hours / 4)
+                self.other.player_count += 400 * n
+            while hours >= 4:
+                now = DT.datetime.now(DT.timezone.utc).astimezone()
+                now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
+                last_time = last_time + DT.timedelta(hours=4)
+                hours = (DT.datetime.strptime(f"{now:{time_format_1}}",
+                                              time_format_1) - last_time).total_seconds() / 3600
+                time = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - last_time
+                self.time = DT.datetime.strptime('4:00:00', time_format_2) - DT.datetime.strptime(f'{time}',
+                                                                                                   time_format_2)
+
+                cur.execute(f"""UPDATE Users
+                SET 
+                    Lust_online = '{now}'
+                WHERE User = '{self.user}'""")
+
             self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
             self.font = pygame.font.Font(None, int(self.font_size))
-            self.text = self.font.render(f"До пополнения счёта {self.time2.time()}", True, (255, 255, 255))
+            self.text = self.font.render(f"До пополнения счёта {self.time}", True, (255, 255, 255))
             self.rect = self.image.get_rect()
             self.rect.x = self.x
             self.rect.y = self.y
             self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
                                         (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
-            self.v = 0
-        else:
-            self.v += 1

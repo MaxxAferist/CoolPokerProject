@@ -29,19 +29,33 @@ class MainWindow(QMainWindow, Window_start):
         if result != None:
             count = result[0]
             pygame.init()
-            now = DT.datetime.now(DT.timezone.utc).astimezone()
             time_format_1 = "%Y-%m-%d %H:%M:%S"
             time_format_2 = "%H:%M:%S"
-            print(now)
-            time = (DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - DT.datetime.strptime(result[1], time_format_1)).total_seconds() / 3600
-            time1 = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - DT.datetime.strptime(result[1], time_format_1)
-            time_timer = DT.datetime.strptime('4:00:00', time_format_2) - DT.datetime.strptime(f'{time1}', time_format_2)
-            print(time, time1, time_timer)
-            if time >= 4:
-                n = math.trunc(time / 4)
+            now = DT.datetime.now(DT.timezone.utc).astimezone()
+            now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
+            last_time = DT.datetime.strptime(result[1], time_format_1)
+            hours = (DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - last_time).total_seconds() / 3600
+            time = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - last_time
+            time_timer = DT.datetime.strptime('4:00:00', time_format_2) - DT.datetime.strptime(f'{time}', time_format_2)
+            if hours >= 4:
+                n = math.trunc(hours / 4)
                 count += 400 * n
+            while hours >= 4:
+                now = DT.datetime.now(DT.timezone.utc).astimezone()
+                now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
+                last_time = last_time + DT.timedelta(hours=4)
+                hours = (DT.datetime.strptime(f"{now:{time_format_1}}",
+                                              time_format_1) - last_time).total_seconds() / 3600
+                time = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1) - last_time
+                time_timer = DT.datetime.strptime('4:00:00', time_format_2) - DT.datetime.strptime(f'{time}',
+                                                                                                   time_format_2)
 
-            start_menu = Menu(count, time_timer)
+                cur.execute(f"""UPDATE Users
+SET 
+    Lust_online = '{now}'
+WHERE User = '{User}'""")
+
+            start_menu = Menu(count, User)
             start_menu.run()
             self.close()
         else:
@@ -66,7 +80,10 @@ class Reg_Window(QMainWindow, Window_reg):
         cur = con.cursor()
         User = self.lineEdit.text()
         Pass = self.lineEdit_2.text()
-        cur.execute(f"""INSERT INTO Users(User,Password,Count) VALUES('{User}','{Pass}', 1000)""").fetchone()
+        now = DT.datetime.now(DT.timezone.utc).astimezone()
+        time_format_1 = "%Y-%m-%d %H:%M:%S"
+        now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
+        cur.execute(f"""INSERT INTO Users(User,Password,Count, Lust_online) VALUES('{User}','{Pass}', 1000, '{now}')""")
 
         con.commit()
         con.close()
