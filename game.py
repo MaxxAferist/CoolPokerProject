@@ -1,3 +1,5 @@
+import random
+
 import pygame
 from functions import *
 from mini_menu import *
@@ -442,6 +444,11 @@ class Game():  # Игра
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
         elif winner.player_type == 'player':
+            volume = pygame.mixer.music.get_volume()
+            pygame.mixer.music.set_volume(0)
+            sound = random.choice(WIN_SOUNDS)
+            sound.set_volume(volume)
+            sound.play()
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouWin_image(pos)
             im.add(image)
@@ -456,8 +463,14 @@ class Game():  # Игра
                 im.update()
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
-
+            sound.stop()
+            pygame.mixer.music.set_volume(volume)
         elif winner.player_type == 'bot':
+            volume = pygame.mixer.music.get_volume()
+            pygame.mixer.music.set_volume(0)
+            sound = random.choice(WIN_SOUNDS)
+            sound.set_volume(volume)
+            sound.play()
             pos = WIDTH / 2 - 300 * KOEF, HEIGHT / 2 - 150 * KOEF
             image = YouLose_image(pos)
             im.add(image)
@@ -472,6 +485,8 @@ class Game():  # Игра
                 im.update()
                 pygame.display.flip()
                 self.screen.fill(pygame.Color(0, 0, 0))
+            sound.stop()
+            pygame.mixer.music.set_volume(volume)
         if type(winner) == list:
             self.update()
             self.end_distribution(winner[0], player2=winner[1])
