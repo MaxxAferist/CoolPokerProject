@@ -357,3 +357,12 @@ class Win_particle(pygame.sprite.Sprite):
         self.rect.y += self.velocity[1]
         if not self.rect.colliderect((0, 0, 100, 100)):
             self.kill()
+
+
+class Fishka(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = pygame.transform.scale(load_image('fishka.png'), (300, 300))
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]

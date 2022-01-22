@@ -578,7 +578,9 @@ class Poker_graphic():
             y1 = table.koloda.rect.y
             card.get_trajectory((x1, y1), (x2, y2))
             cards.add(card)
+        fishka = Fishka((380, 645))
         table.cards_sprites.add(cards)
+        table.cards_sprites.add(fishka)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
