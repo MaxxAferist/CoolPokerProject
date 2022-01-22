@@ -6,14 +6,34 @@ import random
 import time
 
 
-WIDTH = 1920
-HEIGHT = 1080
+WIDTH = windll.user32.GetSystemMetrics(0)
+HEIGHT = windll.user32.GetSystemMetrics(1)
+KOEF = WIDTH / 1920
+if WIDTH <= 1920:
+    WIDTH = 1920
+    HEIGHT = 1080
+    KOEF = 1
 FPS = 60
-KOEF = WIDTH / 1980
-KOEF = 1
 pygame.mixer.init()
 SOUNDS = [pygame.mixer.Sound('data//sounds//Click.mp3')]
-WIN_SOUNDS = [pygame.mixer.Sound('data//sounds//Atlant!c, Hyperreal - Shrill.mp3')]
+
+WIN_SOUNDS = [pygame.mixer.Sound('data//sounds//1_win.mp3'),
+              pygame.mixer.Sound('data//sounds//2_win.mp3'),
+              pygame.mixer.Sound('data//sounds//3_win.mp3'),
+              pygame.mixer.Sound('data//sounds//4_win.mp3'),
+              pygame.mixer.Sound('data//sounds//5_win.mp3'),
+              pygame.mixer.Sound('data//sounds//6_win.mp3'),
+              pygame.mixer.Sound('data//sounds//7_win.mp3'),
+              pygame.mixer.Sound('data//sounds//8_win.mp3'),
+              pygame.mixer.Sound('data//sounds//9_win.mp3'),
+              pygame.mixer.Sound('data//sounds//10_win.mp3')]
+
+LOSE_SOUNDS = [pygame.mixer.Sound('data//sounds//1_lose.mp3'),
+               pygame.mixer.Sound('data//sounds//2_lose.mp3'),
+               pygame.mixer.Sound('data//sounds//3_lose.mp3'),
+               pygame.mixer.Sound('data//sounds//4_lose.mp3'),
+               pygame.mixer.Sound('data//sounds//5_lose.mp3'),
+               pygame.mixer.Sound('data//sounds//6_lose.mp3')]
 
 
 def load_image(name): #Загрузка картинки
