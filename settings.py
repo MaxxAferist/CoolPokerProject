@@ -45,6 +45,9 @@ class Settings():
                         self.running = False
             other.all_sprites.draw(other.screen)
             other.fon_sprite.update()
+            if other.timer:
+                other.timer.update()
+                other.info.update()
             self.all_sprites.draw(other.screen)
             self.all_sprites.update()
             self.stack_sprites.draw(other.screen)

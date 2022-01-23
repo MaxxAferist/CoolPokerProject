@@ -3,6 +3,7 @@ import random
 import pygame
 from functions import *
 from mini_menu import *
+from WinOrLoseWindow import WinOrLose
 
 pygame.init()
 
@@ -365,13 +366,11 @@ class Game():  # Игра
             self.waiting(2)
             self.who_win()
         if self.player.money == 0:
-            self.no_money = No_money_game('player')
-            self.all_sprites.add(self.no_money)
+            self.lose_window = WinOrLose('bot', self)
+            self.lose_window.run(self)
         elif self.bot.money == 0:
-            self.no_money = No_money_game('bot')
-            self.all_sprites.add(self.no_money)
-
-        self.go_menu(self.player.money, self.user)
+            self.win_window = WinOrLose('player', self)
+            self.win_window.run(self)
 
     def fold(self, player):
         self.reset = True

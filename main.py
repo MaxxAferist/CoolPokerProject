@@ -41,7 +41,6 @@ class MainWindow(QMainWindow, Window_start):
                 n = math.trunc(hours / 4)
                 count += 400 * n
             while hours >= 4:
-                print(hours)
                 now = DT.datetime.now(DT.timezone.utc).astimezone()
                 now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
                 last_time = last_time + DT.timedelta(hours=4)
@@ -57,9 +56,9 @@ SET
 WHERE User = '{User}'""")
                 con.commit()
 
+            self.close()
             start_menu = Menu(count, User)
             start_menu.run()
-            self.close()
         else:
             self.statusbar.showMessage('Пользователя несуществует')
 
