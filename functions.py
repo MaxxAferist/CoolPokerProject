@@ -487,3 +487,25 @@ class Count_info_timer(pygame.sprite.Sprite):
             self.rect.y = self.y
             self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
                                         (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
+
+
+class No_money_game(pygame.sprite.Sprite):
+    def __init__(self, player_type):
+        super().__init__()
+        self.w = 700
+        self.h = 400
+        self.x = 960 - self.w / 2
+        self.y = 540 - self.h / 2
+        self.font_size = 70
+        self.image = pygame.Surface((self.w, self.h))
+        self.image.fill(pygame.Color(132, 66, 0))
+        self.font = pygame.font.Font(None, int(self.font_size))
+        if player_type == 'player':
+            self.text = self.font.render("У вас кончились и деньги", True, (255, 255, 255))
+        elif player_type == 'bot':
+            self.text = self.font.render("У бота кончились и деньги", True, (255, 255, 255))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
+                                    (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))

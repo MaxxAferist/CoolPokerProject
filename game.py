@@ -364,6 +364,13 @@ class Game():  # Игра
             self.update()
             self.waiting(2)
             self.who_win()
+        if self.player.money == 0:
+            self.no_money = No_money_game('player')
+            self.all_sprites.add(self.no_money)
+        elif self.bot.money == 0:
+            self.no_money = No_money_game('bot')
+            self.all_sprites.add(self.no_money)
+
         self.go_menu(self.player.money, self.user)
 
     def fold(self, player):
