@@ -16,6 +16,7 @@ class Poker_player():  # Класс игрока покера
         self.play = True
         self.move = False
         self.player_type = player_type
+        self.v_bank = False
 
     def call(self, table):  # Ставка, равная наибольшей ставке на столе
         self.money = self.money - (max(list(map(lambda x: x.bid, table.players))) - self.bid)
@@ -239,83 +240,63 @@ class Poker_Logic():  # Логика покера
                 return lst_straight
         return [0]
 
-    def bot_move(self, bot, player, stage_coef, table):
+    def bot_move(self, bot, player, stage_count, table):
         bot_count = self.counter(self.check(bot))
         more_bid = player.bid > bot.bid
-        if stage_coef == 0:
-            if player.bid >= 400:
+        print(bot.bid, player.bid, bot_count, more_bid)
+        if player.bid > bot.money:
+            rand = random.randrange(0, 10)
+            print(rand)
+            if rand > 4:
+                bot.v_bank = True
+                bot.va_bank(table)
+            else:
                 table.fold(bot)
+
+        elif not more_bid and stage_count == 0:
+            if bot.money < 50:
+                bot.v_bank = True
+                bot.va_bank(table)
             else:
-                bot.call(table)
-        elif more_bid:
-            if bot.bid > bot.money * self.border:
-                if bot_count < 300 or bot.bid < 300:
-                    move_choice = random.choice(['call' * stage_coef, 'fold'])
-                    if move_choice == 'call':
-                        bot.call(table)
-                    else:
-                        table.fold(bot)
-                else:
-                    bot.call(table)
-            else:
-                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
-                    bot.va_bank(table)
-                elif 700 <= bot_count <= 900:
-                    self.border = 0.7
-                    bot.reise(round(bot.money * 0.15 * stage_coef) + player.bid)
-                elif 500 <= bot_count <= 700:
-                    self.border = 0.5
-                    bot.reise(round(bot.money * 0.1 * stage_coef) + player.bid)
-                elif player.bid > bot.money * 0.5:
-                    table.fold(bot)
-                elif 300 <= bot_count <= 500:
-                    self.border = 0.3
-                    bot.reise(round(bot.money * 0.08 * stage_coef) + player.bid)
-                elif 200 <= bot_count <= 300:
-                    self.border = 0.2
-                    bot.reise(round(bot.money * 0.03 * stage_coef) + player.bid)
-                elif 109 <= bot_count <= 113:
-                    self.border = 0.15
-                    bot.reise(round(bot.money * 0.02 * stage_coef) + player.bid)
-                else:
-                    move_choice = random.choice(['check' * 3, 'fold'])
-                    if move_choice == 'check':
-                        bot.check(table)
-                    else:
-                        table.fold(bot)
+                bot.reise(random.randrange(25, 50))
         else:
-            if bot.bid > bot.money * self.border:
-                move_choice = random.choice(['call' * stage_coef, 'fold'])
-                if move_choice == 'call':
+            rand = random.randrange(0, 10)
+            if rand > 5:
+                bot.call(table)
+            else:
+                if bot.bid > bot.money * self.border:
                     bot.call(table)
                 else:
-                    table.fold(bot)
-            else:
-                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
-                    bot.va_bank(table)
-                elif 700 <= bot_count <= 900:
-                    self.border = 0.7
-                    bot.reise(round(bot.money * 0.15 * stage_coef))
-                elif 500 <= bot_count <= 700:
-                    self.border = 0.5
-                    bot.reise(round(bot.money * 0.1 * stage_coef))
-                elif player.bid > bot.money * 0.5:
-                    table.fold(bot)
-                elif 300 <= bot_count <= 500:
-                    self.border = 0.3
-                    bot.reise(round(bot.money * 0.08 * stage_coef))
-                elif 200 <= bot_count <= 300:
-                    self.border = 0.2
-                    bot.reise(round(bot.money * 0.03 * stage_coef))
-                elif 109 <= bot_count <= 113:
-                    self.border = 0.15
-                    bot.reise(round(bot.money * 0.02 * stage_coef))
-                else:
-                    move_choice = random.choice(['check' * stage_coef, 'fold'])
-                    if move_choice == 'check':
-                        bot.check(table)
+                    if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
+                        bot.v_bank = True
+                        bot.va_bank(table)
+                    elif 700 <= bot_count <= 900:
+                        self.border = 0.7
+                        bot.reise(round(bot.money * 0.15) + player.bid)
+                    elif 500 <= bot_count <= 700:
+                        self.border = 0.5
+                        bot.reise(round(bot.money * 0.1) + player.bid)
+                    elif player.bid > bot.money * 0.5:
+                        r = random.randrange(0, 10)
+                        if r <= 3:
+                            table.fold(bot)
+                        else:
+                            bot.call(table)
+                    elif 300 <= bot_count <= 500:
+                        self.border = 0.3
+                        bot.reise(round(bot.money * 0.08) + player.bid)
+                    elif 200 <= bot_count <= 300:
+                        self.border = 0.2
+                        bot.reise(round(bot.money * 0.03) + player.bid)
+                    elif 109 <= bot_count <= 113:
+                        self.border = 0.15
+                        bot.reise(round(bot.money * 0.02) + player.bid)
                     else:
-                        table.fold(bot)
+                        move_choice = random.choice(['check' * 3, 'fold'])
+                        if move_choice == 'check':
+                            bot.check(table)
+                        else:
+                            table.fold(bot)
 
     def request_player_cards(self, player):
         cards = [(player.cards[0].value, player.cards[0].suit),
@@ -507,12 +488,12 @@ class Game():  # Игра
         self.logic.river()
         self.graph.river(self, self.logic.table_cards)
 
-    def bet(self, stage_coef):
+    def bet(self, stage_count):
         for i in range(len(self.players)):
             if self.players[i].move and self.players[i].play:
                 if self.players[i].player_type == 'bot':
                     self.waiting(1)
-                    self.logic.bot_move(self.players[i], self.players[i + 1], stage_coef, self)
+                    self.logic.bot_move(self.players[i], self.players[i + 1], stage_count, self)
                     if i + 1 < len(self.players):
                         self.players[i + 1].move = True
                     else:
