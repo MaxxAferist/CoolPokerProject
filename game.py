@@ -250,11 +250,14 @@ class Poker_Logic():  # Логика покера
                 bot.call(table)
         elif more_bid:
             if bot.bid > bot.money * self.border:
-                move_choice = random.choice(['call' * stage_coef, 'fold'])
-                if move_choice == 'call':
-                    bot.call(table)
+                if bot_count < 300 or bot.bid < 300:
+                    move_choice = random.choice(['call' * stage_coef, 'fold'])
+                    if move_choice == 'call':
+                        bot.call(table)
+                    else:
+                        bot.fold(table)
                 else:
-                    bot.fold(table)
+                    bot.call(table)
             else:
                 if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
                     bot.va_bank(table)
