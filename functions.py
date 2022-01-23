@@ -477,6 +477,7 @@ class Count_info_timer(pygame.sprite.Sprite):
                 SET 
                     Lust_online = '{now}'
                 WHERE User = '{self.user}'""")
+                con.commit()
 
             self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
             self.font = pygame.font.Font(None, int(self.font_size))
