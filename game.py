@@ -63,6 +63,7 @@ class Poker_Logic():  # Логика покера
         self.bank = 0
         self.players = []
         self.table_cards = []
+        self.border = 1
 
     def full_deck(self):  # Полная перемешанная колода карт
         values = ['2', '3', '4', '5', '6', '7', '8', '9',
@@ -240,32 +241,40 @@ class Poker_Logic():  # Логика покера
 
     def bot_move(self, bot, player, stage_coef, table):
         bot_count = self.counter(self.check(bot))
-        more_bid = bot.bid < player.bid
-        coef = player.money / bot.money
-        if bot.money > player.money:
-            coef = player.money / bot.money
-        elif bot.money < player.money:
-            coef = bot.money / player.money
-        print(more_bid, bot.bid, player.bid, bot_count, stage_coef)
-        print(coef)
-        if more_bid:
-            if bot.bid > bot.money * 0.4:
+        more_bid = player.bid > bot.bid
+        print(bot_count, bot.bid, player.bid, self.border, more_bid, bot.money)
+        if stage_coef == 0:
+            if player.bid >= 400:
+                bot.fold(table)
+            else:
                 bot.call(table)
-            elif player.bid < bot.money:
-                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900 and stage_coef == 3):
+        elif more_bid:
+            if bot.bid > bot.money * self.border:
+                move_choice = random.choice(['call' * stage_coef, 'fold'])
+                if move_choice == 'call':
+                    bot.call(table)
+                else:
+                    bot.fold(table)
+            else:
+                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
                     bot.va_bank(table)
                 elif 700 <= bot_count <= 900:
-                    bot.reise(round(bot.money * 0.15 * coef * stage_coef) + player.bid)
+                    self.border = 0.7
+                    bot.reise(round(bot.money * 0.15 * stage_coef) + player.bid)
                 elif 500 <= bot_count <= 700:
-                    bot.reise(round(bot.money * 0.1 * coef * stage_coef) + player.bid)
-                elif 300 <= bot_count <= 500:
-                    bot.reise(round(bot.money * 0.08 * coef * stage_coef) + player.bid)
-                elif player.bid > bot.money * 0.6:
+                    self.border = 0.5
+                    bot.reise(round(bot.money * 0.1 * stage_coef) + player.bid)
+                elif player.bid > bot.money * 0.5:
                     bot.fold(table)
+                elif 300 <= bot_count <= 500:
+                    self.border = 0.3
+                    bot.reise(round(bot.money * 0.08 * stage_coef) + player.bid)
                 elif 200 <= bot_count <= 300:
-                    bot.reise(round(bot.money * 0.03 * coef * stage_coef) + player.bid)
+                    self.border = 0.2
+                    bot.reise(round(bot.money * 0.03 * stage_coef) + player.bid)
                 elif 109 <= bot_count <= 113:
-                    bot.call(table)
+                    self.border = 0.15
+                    bot.reise(round(bot.money * 0.02 * stage_coef) + player.bid)
                 else:
                     move_choice = random.choice(['check' * stage_coef, 'fold'])
                     print(move_choice)
@@ -273,36 +282,40 @@ class Poker_Logic():  # Логика покера
                         bot.check(table)
                     else:
                         bot.fold(table)
-            else:
-                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900 and stage_coef == 3):
-                    bot.va_bank(table)
-                elif 700 <= bot_count <= 900:
-                    bot.va_bank(table)
-                elif 500 <= bot_count <= 700:
-                    bot.va_bank(table)
+        else:
+            if bot.bid > bot.money * self.border:
+                move_choice = random.choice(['call' * stage_coef, 'fold'])
+                if move_choice == 'call':
+                    bot.call(table)
                 else:
                     bot.fold(table)
-        else:
-            if bot.bid > bot.money * 0.3:
-                bot.call(table)
             else:
-                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900 and stage_coef == 3):
+                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
                     bot.va_bank(table)
                 elif 700 <= bot_count <= 900:
-                    bot.reise(round(bot.money * (0.12 * stage_coef) * coef))
+                    self.border = 0.7
+                    bot.reise(round(bot.money * 0.15 * stage_coef))
                 elif 500 <= bot_count <= 700:
-                    bot.reise(round(bot.money * (0.1 * stage_coef) * coef))
+                    self.border = 0.5
+                    bot.reise(round(bot.money * 0.1 * stage_coef))
+                elif player.bid > bot.money * 0.5:
+                    bot.fold(table)
                 elif 300 <= bot_count <= 500:
-                    bot.reise(round(bot.money * (0.08 * stage_coef) * coef))
+                    self.border = 0.3
+                    bot.reise(round(bot.money * 0.08 * stage_coef))
                 elif 200 <= bot_count <= 300:
-                    bot.reise(round(bot.money * (0.03 * stage_coef) * coef))
+                    self.border = 0.2
+                    bot.reise(round(bot.money * 0.03 * stage_coef))
+                elif 109 <= bot_count <= 113:
+                    self.border = 0.15
+                    bot.reise(round(bot.money * 0.02 * stage_coef))
                 else:
                     move_choice = random.choice(['check' * stage_coef, 'fold'])
                     print(move_choice)
                     if move_choice == 'check':
                         bot.check(table)
                     else:
-                        bot.fold()
+                        bot.fold(table)
 
     def request_player_cards(self, player):
         cards = [(player.cards[0].value, player.cards[0].suit),
