@@ -21,6 +21,7 @@ class WinOrLose():
         self.all_sprites.add(self.btn_ok)
         self.clock = pygame.time.Clock()
         self.running = True
+        other.update()
 
     def run(self, other):
         while self.running:

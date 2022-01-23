@@ -309,6 +309,7 @@ class Game():  # Игра
         self.button_sprites.add(self.buttons)
         self.add_sprites()
         self.go_menu = go_menu
+        self.timer = None
 
     def run(self):
         pygame.mixer.music.load('data//music//Mark Shubin - Path of life.mp3')
@@ -365,10 +366,10 @@ class Game():  # Игра
             self.update()
             self.waiting(2)
             self.who_win()
-        if self.player.money == 0:
+        if self.player.money <= 0:
             self.lose_window = WinOrLose('bot', self)
             self.lose_window.run(self)
-        elif self.bot.money == 0:
+        elif self.bot.money <= 0:
             self.win_window = WinOrLose('player', self)
             self.win_window.run(self)
 
