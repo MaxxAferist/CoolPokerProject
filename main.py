@@ -84,7 +84,7 @@ class Reg_Window(QMainWindow, Window_reg):
         now = DT.datetime.now(DT.timezone.utc).astimezone()
         time_format_1 = "%Y-%m-%d %H:%M:%S"
         now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
-        cur.execute(f"""INSERT INTO Users(User,Password,Count, Lust_online) VALUES('{User}','{Pass}', 9999999, '{now}')""")
+        cur.execute(f"""INSERT INTO Users(User,Password,Count, Lust_online) VALUES('{User}','{Pass}', 5000, '{now}')""")
 
         con.commit()
         con.close()
