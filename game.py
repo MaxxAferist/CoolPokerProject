@@ -242,10 +242,9 @@ class Poker_Logic():  # Логика покера
     def bot_move(self, bot, player, stage_coef, table):
         bot_count = self.counter(self.check(bot))
         more_bid = player.bid > bot.bid
-        print(bot_count, bot.bid, player.bid, self.border, more_bid, bot.money)
         if stage_coef == 0:
             if player.bid >= 400:
-                bot.fold(table)
+                table.fold(bot)
             else:
                 bot.call(table)
         elif more_bid:
@@ -255,7 +254,7 @@ class Poker_Logic():  # Логика покера
                     if move_choice == 'call':
                         bot.call(table)
                     else:
-                        bot.fold(table)
+                        table.fold(bot)
                 else:
                     bot.call(table)
             else:
@@ -268,7 +267,7 @@ class Poker_Logic():  # Логика покера
                     self.border = 0.5
                     bot.reise(round(bot.money * 0.1 * stage_coef) + player.bid)
                 elif player.bid > bot.money * 0.5:
-                    bot.fold(table)
+                    table.fold(bot)
                 elif 300 <= bot_count <= 500:
                     self.border = 0.3
                     bot.reise(round(bot.money * 0.08 * stage_coef) + player.bid)
@@ -279,19 +278,18 @@ class Poker_Logic():  # Логика покера
                     self.border = 0.15
                     bot.reise(round(bot.money * 0.02 * stage_coef) + player.bid)
                 else:
-                    move_choice = random.choice(['check' * stage_coef, 'fold'])
-                    print(move_choice)
+                    move_choice = random.choice(['check' * 3, 'fold'])
                     if move_choice == 'check':
                         bot.check(table)
                     else:
-                        bot.fold(table)
+                        table.fold(bot)
         else:
             if bot.bid > bot.money * self.border:
                 move_choice = random.choice(['call' * stage_coef, 'fold'])
                 if move_choice == 'call':
                     bot.call(table)
                 else:
-                    bot.fold(table)
+                    table.fold(bot)
             else:
                 if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
                     bot.va_bank(table)
@@ -302,7 +300,7 @@ class Poker_Logic():  # Логика покера
                     self.border = 0.5
                     bot.reise(round(bot.money * 0.1 * stage_coef))
                 elif player.bid > bot.money * 0.5:
-                    bot.fold(table)
+                    table.fold(bot)
                 elif 300 <= bot_count <= 500:
                     self.border = 0.3
                     bot.reise(round(bot.money * 0.08 * stage_coef))
@@ -314,11 +312,10 @@ class Poker_Logic():  # Логика покера
                     bot.reise(round(bot.money * 0.02 * stage_coef))
                 else:
                     move_choice = random.choice(['check' * stage_coef, 'fold'])
-                    print(move_choice)
                     if move_choice == 'check':
                         bot.check(table)
                     else:
-                        bot.fold(table)
+                        table.fold(bot)
 
     def request_player_cards(self, player):
         cards = [(player.cards[0].value, player.cards[0].suit),
@@ -521,8 +518,12 @@ class Game():  # Игра
                     else:
                         self.players[0].move = True
                 else:
-                    self.graph.bet(self, self.players[i],
-                                   self.logic.max_bid() - self.players[i].bid, self.players[i].money)
+                    if self.players[i].bid == 0 and self.logic.max_bid() - self.players[i].bid < 25:
+                        self.graph.bet(self, self.players[i],
+                                       24, self.players[i].money - 1)
+                    else:
+                        self.graph.bet(self, self.players[i],
+                                       self.logic.max_bid() - self.players[i].bid, self.players[i].money - 1)
                     if i + 1 < len(self.players):
                         self.players[i + 1].move = True
                     else:
