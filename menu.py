@@ -76,10 +76,10 @@ class Menu():
         self.all_sprites.add(self.buttons)
         self.button_sprites.add(self.buttons)
 
-        self.info = Count_info(player_count, (1000, 20, 1000, 100), 100)
+        self.info = Count_info(player_count, (1000 * KOEF, 20 * KOEF, 1000 * KOEF, 100 * KOEF), 100 * KOEF)
         self.all_sprites.add(self.info)
 
-        self.timer = Count_info_timer(self.username, (700, 850, 1150, 100), 100, self)
+        self.timer = Count_info_timer(self.username, (700 * KOEF, 850 * KOEF, 1150 * KOEF, 100 * KOEF), 100 * KOEF, self)
         self.all_sprites.add(self.timer)
 
     def run(self):

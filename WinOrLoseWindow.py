@@ -27,13 +27,10 @@ class WinOrLose():
         while self.running:
             other.screen.fill(pygame.Color(0, 0, 0))
             for event in pygame.event.get():
-                pass
+                self.all_sprites.update()
             if self.fon.rect.y + 20 < 0:
                 self.fon.rect.y += 20
             self.btn_ok.rect.y = self.fon.rect.y + self.fon.rect.h * 0.75
-            other.all_sprites.draw(other.screen)
-            other.fon_sprite.update()
             self.all_sprites.draw(other.screen)
-            self.all_sprites.update()
             pygame.display.flip()
             self.clock.tick(FPS)

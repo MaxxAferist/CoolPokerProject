@@ -19,10 +19,12 @@ class Poker_player():  # Класс игрока покера
         self.v_bank = False
 
     def call(self, table):  # Ставка, равная наибольшей ставке на столе
-        self.money = self.money - (max(list(map(lambda x: x.bid, table.players))) - self.bid)
-        self.bid = max(list(map(lambda x: x.bid, table.players)))
-        self.move = False
-        table.graph.go_bid = False
+        if self.money - (max(list(map(lambda x: x.bid, table.players))) - self.bid) > 0 and \
+                len(set(list(map(lambda x: x.bid, table.players)))) != 1:
+            self.money = self.money - (max(list(map(lambda x: x.bid, table.players))) - self.bid)
+            self.bid = max(list(map(lambda x: x.bid, table.players)))
+            self.move = False
+            table.graph.go_bid = False
 
     def reise(self, bid):  # Ставка, большая чем самая большая
         self.bid += bid
@@ -41,11 +43,13 @@ class Poker_player():  # Класс игрока покера
         self.move = False
         self.money = 0
         table.graph.go_bid = False
+        table.va_bank = True
 
     def check(self, table):  # Пропуск ставки
-        self.move = False
-        table.graph.go_bid = False
-        table.check = True
+        if len(set(list(map(lambda x: x.bid, table.players)))) == 1:
+            self.move = False
+            table.graph.go_bid = False
+            table.check = True
 
     def little_blind(self):
         self.bid = 25
@@ -242,20 +246,14 @@ class Poker_Logic():  # Логика покера
 
     def bot_move(self, bot, player, stage_count, table):
         bot_count = self.counter(self.check(bot))
-        more_bid = player.bid > bot.bid
-        print(bot.bid, player.bid, bot_count, more_bid)
         if player.bid > bot.money:
             rand = random.randrange(0, 10)
-            print(rand)
             if rand > 4:
-                bot.v_bank = True
                 bot.va_bank(table)
             else:
                 table.fold(bot)
-
-        elif not more_bid and stage_count == 0:
+        elif stage_count == 0:
             if bot.money < 50:
-                bot.v_bank = True
                 bot.va_bank(table)
             else:
                 bot.reise(random.randrange(25, 50))
@@ -268,7 +266,6 @@ class Poker_Logic():  # Логика покера
                     bot.call(table)
                 else:
                     if (bot_count > 500 and bot.money <= 300) or (bot_count > 900):
-                        bot.v_bank = True
                         bot.va_bank(table)
                     elif 700 <= bot_count <= 900:
                         self.border = 0.7
@@ -351,7 +348,7 @@ class Game():  # Игра
                                                                   int(koloda_image.get_height() * KOEF)))
         self.graph = Poker_graphic()
         self.logic = Poker_Logic()
-        self.bot = Poker_player(1000, 'bot')
+        self.bot = Poker_player(5000, 'bot')
         self.player = Poker_player(count, 'player')
         self.players = [self.bot, self.player]
         self.logic.players = [self.bot, self.player]
@@ -379,6 +376,8 @@ class Game():  # Игра
         while self.player.money > 0 and self.bot.money > 0:
             self.reset = False
             self.check = False
+            self.va_bank = False
+            self.ask_on_va_bank = False
             self.random_blind()
             self.little_blind()
             self.update()
@@ -388,6 +387,18 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
+                if self.va_bank:
+                    if self.ask_on_va_bank:
+                        break
+                    else:
+                        self.ask_on_va_bank = True
+                        for pl in self.players:
+                            if pl.money > 0:
+                                asker = pl
+                            if pl.money == 0:
+                                va_banker = pl
+                        if asker.bid >= va_banker.bid:
+                            break
                 self.bet(0)
                 self.update()
                 if self.reset:
@@ -398,6 +409,18 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
+                if self.va_bank:
+                    if self.ask_on_va_bank:
+                        break
+                    else:
+                        self.ask_on_va_bank = True
+                        for pl in self.players:
+                            if pl.money > 0:
+                                asker = pl
+                            if pl.money == 0:
+                                va_banker = pl
+                        if asker.bid >= va_banker.bid:
+                            break
                 self.bet(1)
                 self.update()
                 if self.reset:
@@ -408,6 +431,18 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
+                if self.va_bank:
+                    if self.ask_on_va_bank:
+                        break
+                    else:
+                        self.ask_on_va_bank = True
+                        for pl in self.players:
+                            if pl.money > 0:
+                                asker = pl
+                            if pl.money == 0:
+                                va_banker = pl
+                        if asker.bid >= va_banker.bid:
+                            break
                 self.bet(2)
                 self.update()
                 if self.reset:
@@ -418,6 +453,18 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
+                if self.va_bank:
+                    if self.ask_on_va_bank:
+                        break
+                    else:
+                        self.ask_on_va_bank = True
+                        for pl in self.players:
+                            if pl.money > 0:
+                                asker = pl
+                            if pl.money == 0:
+                                va_banker = pl
+                        if asker.bid >= va_banker.bid:
+                            break
                 self.bet(3)
                 self.update()
                 if self.reset:
@@ -489,6 +536,7 @@ class Game():  # Игра
         self.graph.river(self, self.logic.table_cards)
 
     def bet(self, stage_count):
+        self.check = False
         for i in range(len(self.players)):
             if self.players[i].move and self.players[i].play:
                 if self.players[i].player_type == 'bot':
@@ -501,10 +549,10 @@ class Game():  # Игра
                 else:
                     if self.players[i].bid == 0 and self.logic.max_bid() - self.players[i].bid < 25:
                         self.graph.bet(self, self.players[i],
-                                       24, self.players[i].money - 1)
+                                       25, self.players[i].money - 1)
                     else:
                         self.graph.bet(self, self.players[i],
-                                       self.logic.max_bid() - self.players[i].bid, self.players[i].money - 1)
+                                       self.logic.max_bid() - self.players[i].bid + 1, self.players[i].money - 1)
                     if i + 1 < len(self.players):
                         self.players[i + 1].move = True
                     else:
@@ -698,7 +746,7 @@ class Poker_graphic():
             y1 = table.koloda.rect.y
             card.get_trajectory((x1, y1), (x2, y2))
             cards.add(card)
-        fishka = Fishka((380, 645))
+        fishka = Fishka((380 * KOEF, 645 * KOEF))
         table.cards_sprites.add(cards)
         table.cards_sprites.add(fishka)
         while True:
@@ -818,7 +866,7 @@ class Poker_graphic():
                 break
 
     def bet(self, table, player, first_value, last_value):
-        table.buttons[3].action = lambda: self.reise(table, player, first_value + 1, last_value)
+        table.buttons[3].action = lambda: self.reise(table, player, first_value, last_value)
         self.close_reise_flag = False
         self.go_bid = True
         while self.go_bid:

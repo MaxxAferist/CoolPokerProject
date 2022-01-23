@@ -341,6 +341,7 @@ class YouLose_image(pygame.sprite.Sprite):
         else:
             self.v += 1
 
+
 class Draw_image(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
@@ -366,6 +367,7 @@ class Draw_image(pygame.sprite.Sprite):
             self.v = 0
         else:
             self.v += 1
+
 
 class Win_particle(pygame.sprite.Sprite):
     fire = [load_image("star.png")]
@@ -393,7 +395,7 @@ class Win_particle(pygame.sprite.Sprite):
 class Fishka(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
-        self.image = pygame.transform.scale(load_image('fishka.png'), (300, 300))
+        self.image = pygame.transform.scale(load_image('fishka.png'), (300 * KOEF, 300 * KOEF))
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
@@ -425,6 +427,7 @@ class Count_info(pygame.sprite.Sprite):
         self.rect.y = self.y
         self.image.blit(self.text, ((self.rect.w - self.text.get_rect()[2]) // 2,
                                     (self.rect.h - self.text.get_rect()[3] + 8 * KOEF) // 2))
+
 
 class Count_info_timer(pygame.sprite.Sprite):
     def __init__(self, username, pos, font_size, other):
