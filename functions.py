@@ -410,7 +410,7 @@ class Count_info(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
         self.count = count
         self.font = pygame.font.Font(None, int(self.font_size))
-        self.text = self.font.render(f"У вас {self.count} фишек", True, (255, 255, 255))
+        self.text = self.font.render(f"У вас {self.count} фишек", True, (247, 69, 51))
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
@@ -419,7 +419,7 @@ class Count_info(pygame.sprite.Sprite):
 
     def update(self):
         self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
-        self.text = self.font.render(f"У вас {self.count} фишек", True, (255, 255, 255))
+        self.text = self.font.render(f"У вас {self.count} фишек", True, (247, 69, 51))
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
@@ -439,7 +439,7 @@ class Count_info_timer(pygame.sprite.Sprite):
         self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
         self.time = 0
         self.font = pygame.font.Font(None, int(self.font_size))
-        self.text = self.font.render(f"До пополнения счёта {self.time}", True, (255, 255, 255))
+        self.text = self.font.render(f"До пополнения счёта {self.time}", True, (247, 69, 51))
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
@@ -481,7 +481,7 @@ class Count_info_timer(pygame.sprite.Sprite):
 
             self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
             self.font = pygame.font.Font(None, int(self.font_size))
-            self.text = self.font.render(f"До пополнения счёта {self.time}", True, (255, 255, 255))
+            self.text = self.font.render(f"До пополнения счёта {self.time}", True, (247, 69, 51))
             self.rect = self.image.get_rect()
             self.rect.x = self.x
             self.rect.y = self.y
