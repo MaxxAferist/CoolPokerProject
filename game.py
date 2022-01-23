@@ -28,10 +28,12 @@ class Poker_player():  # Класс игрока покера
         self.move = False
         self.money -= bid
 
-    def fold(self):  # Пас
+    def fold(self, table):  # Пас
         self.play = False
         self.cards = [None, None]
         self.move = False
+        table.reset = True
+        table.graph.go_bid = False
 
     def va_bank(self, table):  # Ва-банк
         self.bid += self.money
@@ -236,6 +238,72 @@ class Poker_Logic():  # Логика покера
                 return lst_straight
         return [0]
 
+    def bot_move(self, bot, player, stage_coef, table):
+        bot_count = self.counter(self.check(bot))
+        more_bid = bot.bid < player.bid
+        coef = player.money / bot.money
+        if bot.money > player.money:
+            coef = player.money / bot.money
+        elif bot.money < player.money:
+            coef = bot.money / player.money
+        print(more_bid, bot.bid, player.bid, bot_count, stage_coef)
+        print(coef)
+        if more_bid:
+            if bot.bid > bot.money * 0.4:
+                bot.call(table)
+            elif player.bid < bot.money:
+                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900 and stage_coef == 3):
+                    bot.va_bank(table)
+                elif 700 <= bot_count <= 900:
+                    bot.reise(round(bot.money * 0.15 * coef * stage_coef) + player.bid)
+                elif 500 <= bot_count <= 700:
+                    bot.reise(round(bot.money * 0.1 * coef * stage_coef) + player.bid)
+                elif 300 <= bot_count <= 500:
+                    bot.reise(round(bot.money * 0.08 * coef * stage_coef) + player.bid)
+                elif player.bid > bot.money * 0.6:
+                    bot.fold(table)
+                elif 200 <= bot_count <= 300:
+                    bot.reise(round(bot.money * 0.03 * coef * stage_coef) + player.bid)
+                elif 109 <= bot_count <= 113:
+                    bot.call(table)
+                else:
+                    move_choice = random.choice(['check' * stage_coef, 'fold'])
+                    print(move_choice)
+                    if move_choice == 'check':
+                        bot.check(table)
+                    else:
+                        bot.fold(table)
+            else:
+                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900 and stage_coef == 3):
+                    bot.va_bank(table)
+                elif 700 <= bot_count <= 900:
+                    bot.va_bank(table)
+                elif 500 <= bot_count <= 700:
+                    bot.va_bank(table)
+                else:
+                    bot.fold(table)
+        else:
+            if bot.bid > bot.money * 0.3:
+                bot.call(table)
+            else:
+                if (bot_count > 500 and bot.money <= 300) or (bot_count > 900 and stage_coef == 3):
+                    bot.va_bank(table)
+                elif 700 <= bot_count <= 900:
+                    bot.reise(round(bot.money * (0.12 * stage_coef) * coef))
+                elif 500 <= bot_count <= 700:
+                    bot.reise(round(bot.money * (0.1 * stage_coef) * coef))
+                elif 300 <= bot_count <= 500:
+                    bot.reise(round(bot.money * (0.08 * stage_coef) * coef))
+                elif 200 <= bot_count <= 300:
+                    bot.reise(round(bot.money * (0.03 * stage_coef) * coef))
+                else:
+                    move_choice = random.choice(['check' * stage_coef, 'fold'])
+                    print(move_choice)
+                    if move_choice == 'check':
+                        bot.check(table)
+                    else:
+                        bot.fold()
+
     def request_player_cards(self, player):
         cards = [(player.cards[0].value, player.cards[0].suit),
                  (player.cards[1].value, player.cards[1].suit)]
@@ -326,7 +394,7 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
-                self.bet()
+                self.bet(0)
                 self.update()
                 if self.reset:
                     break
@@ -336,7 +404,7 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
-                self.bet()
+                self.bet(1)
                 self.update()
                 if self.reset:
                     break
@@ -346,7 +414,7 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
-                self.bet()
+                self.bet(2)
                 self.update()
                 if self.reset:
                     break
@@ -356,7 +424,7 @@ class Game():  # Игра
             self.update()
             while min(list(map(lambda x: x.bid, self.players))) != max(list(map(lambda x: x.bid, self.players))) or \
                     max(list(map(lambda x: x.bid, self.players))) == 0 or self.check:
-                self.bet()
+                self.bet(3)
                 self.update()
                 if self.reset:
                     break
@@ -374,15 +442,13 @@ class Game():  # Игра
             self.win_window.run(self)
 
     def fold(self, player):
-        self.reset = True
-        player.fold()
+        player.fold(self)
         for pl in self.players:
             if not (pl is player):
                 self.logic.bank += pl.bid
                 pl.bid = 0
                 self.end_distribution(pl, False)
                 self.update()
-        self.graph.go_bid = False
 
     def random_blind(self):
         random.choice(self.players).move = True
@@ -428,12 +494,12 @@ class Game():  # Игра
         self.logic.river()
         self.graph.river(self, self.logic.table_cards)
 
-    def bet(self):
+    def bet(self, stage_coef):
         for i in range(len(self.players)):
             if self.players[i].move and self.players[i].play:
                 if self.players[i].player_type == 'bot':
                     self.waiting(1)
-                    self.players[i].reise(100)
+                    self.logic.bot_move(self.players[i], self.players[i + 1], stage_coef, self)
                     if i + 1 < len(self.players):
                         self.players[i + 1].move = True
                     else:
