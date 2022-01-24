@@ -86,7 +86,6 @@ class Reg_Window(QMainWindow, Window_reg):
         now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
         result = cur.execute(f"""SELECT id FROM Users
                                         WHERE User = '{User}'""").fetchone()
-        print(result)
         if result == None:
             cur.execute(f"""INSERT INTO Users(User,Password,Count, Lust_online) VALUES('{User}','{Pass}', 5000, '{now}')""")
             con.commit()

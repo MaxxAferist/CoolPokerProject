@@ -104,10 +104,11 @@ class Button(pygame.sprite.Sprite): #Класс кнопок
             self.image.blit(self.text, ((self.w * KOEF // 2 - self.text.get_rect()[2] / 2), self.up_top * KOEF))
             self.pressed_flag = True
         elif self.rect.collidepoint(pos) and self.pressed_flag and not pressed:
-            if self.click_flag and self.action:
+            if self.click_flag:
                 self.sound.play()
                 self.pressed_flag = False
-                self.action()
+                if self.action:
+                    self.action()
         elif self.rect.collidepoint(pos):
             self.click_flag = True
             f = pygame.font.Font(None, int(self.font_size))

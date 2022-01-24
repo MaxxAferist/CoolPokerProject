@@ -256,7 +256,12 @@ class Poker_Logic():  # Логика покера
             if bot.money < 50:
                 bot.va_bank(table)
             else:
-                bot.reise(random.randrange(25, 50))
+                if player.bid > bot.bid:
+                    rand = random.randrange(0, 10)
+                    if rand > 5:
+                        bot.call(table)
+                    else:
+                        bot.reise(random.randrange(player.bid + 1, player.bid + 26))
         else:
             rand = random.randrange(0, 10)
             if rand > 5:
@@ -275,8 +280,9 @@ class Poker_Logic():  # Логика покера
                         bot.reise(round(bot.money * 0.1) + player.bid)
                     elif player.bid > bot.money * 0.5:
                         r = random.randrange(0, 10)
-                        if r <= 3:
+                        if r <= 2:
                             table.fold(bot)
+                            print(2)
                         else:
                             bot.call(table)
                     elif 300 <= bot_count <= 500:
@@ -289,7 +295,7 @@ class Poker_Logic():  # Логика покера
                         self.border = 0.15
                         bot.reise(round(bot.money * 0.02) + player.bid)
                     else:
-                        move_choice = random.choice(['check' * 3, 'fold'])
+                        move_choice = random.choice(['check' * 5, 'fold'])
                         if move_choice == 'check':
                             bot.check(table)
                         else:
@@ -866,7 +872,10 @@ class Poker_graphic():
                 break
 
     def bet(self, table, player, first_value, last_value):
-        table.buttons[3].action = lambda: self.reise(table, player, first_value, last_value)
+        if first_value >= last_value:
+            table.buttons[3].action = None
+        else:
+            table.buttons[3].action = lambda: self.reise(table, player, first_value, last_value)
         self.close_reise_flag = False
         self.go_bid = True
         while self.go_bid:
