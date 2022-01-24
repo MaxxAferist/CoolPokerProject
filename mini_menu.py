@@ -23,7 +23,7 @@ class Mini_menu():
     def add_buttons(self, other):
         left_top = 30 * KOEF
         up_top = 20 * KOEF
-        w_btn = (self.fon.rect.w - left_top * 2)
+        w_btn = (self.fon.rect.w - left_top * 2) / KOEF
         h_btn = w_btn * 0.37
         self.buttons = [Button('Продолжить', (left_top, up_top), (w_btn, h_btn), 43, self.close),
                         Button('Настройки', (left_top, up_top * 2 + h_btn), (w_btn, h_btn), 43, lambda: go_settings(other)),
