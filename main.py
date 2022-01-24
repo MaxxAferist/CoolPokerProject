@@ -84,14 +84,19 @@ class Reg_Window(QMainWindow, Window_reg):
         now = DT.datetime.now(DT.timezone.utc).astimezone()
         time_format_1 = "%Y-%m-%d %H:%M:%S"
         now = DT.datetime.strptime(f"{now:{time_format_1}}", time_format_1)
-        cur.execute(f"""INSERT INTO Users(User,Password,Count, Lust_online) VALUES('{User}','{Pass}', 5000, '{now}')""")
+        result = cur.execute(f"""SELECT id FROM Users
+                                        WHERE User = '{User}'""").fetchone()
+        print(result)
+        if result == None:
+            cur.execute(f"""INSERT INTO Users(User,Password,Count, Lust_online) VALUES('{User}','{Pass}', 5000, '{now}')""")
+            con.commit()
+            con.close()
 
-        con.commit()
-        con.close()
-
-        self.ex = MainWindow()
-        self.ex.show()
-        self.close()
+            self.ex = MainWindow()
+            self.ex.show()
+            self.close()
+        else:
+            self.statusbar.showMessage('Логин пользователя занят')
 
 
 if __name__ == '__main__':
